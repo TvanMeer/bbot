@@ -1,2 +1,3 @@
 # bbot
-A simple framework for building binance spot trading bots
+
+A simple framework to build binance spot trading bots
