@@ -12,11 +12,22 @@ from binance import AsyncClient, BinanceSocketManager
 class Coin():
     """All realtime data belonging to a symbol, such as BTCUSDT."""
 
-    def __init__(self, symbol):
-        pass
+    def __init__(self, symbol, intervals, windowsize):
+        self.symbol = symbol
+        self.intervals = intervals
+        self.windowsize = windowsize
+        [setattr(self, 'candles_' + iv, []) for iv in intervals]
+
+        self._history_downloaded = False
+
+    def add_historical_candles(self, raw):
+        print('Historical candles downloaded -------')
+        self._history_downloaded = True
 
     def add_candle(self, raw):
-        pass
+        if self._history_downloaded == False:
+            pass
+        print('Stream candle processed -------------')
 
 
 class DataBase():
@@ -53,9 +64,34 @@ class _Api():
                         db.symbols.add(t['symbol'])
 
         for s in db.symbols:
-            db.coins[s] = Coin(s)
+            db.coins[s] = Coin(s, db.intervals, db.windowsize)
 
-        await self.start_candle_streams(client, db)
+        hist = asyncio.create_task(self.download_history(client, db))
+        cs = asyncio.create_task(self.start_candle_streams(client, db))
+        _ = await asyncio.gather(hist, cs)
+
+    async def download_history(self, client, db):
+        for s in db.symbols:
+            for iv in db.intervals:
+                timestr = self._to_timestring(iv, db.windowsize)
+                candles = await client.get_historical_klines(s, iv, timestr)
+                db.coins[s].add_historical_candles(candles)
+
+    def _to_timestring(self, interval, windowsize):
+        amount = windowsize * int(interval[:-1])
+        period = interval[-1]
+        if period == 'm':
+            return f'{amount} minutes ago UTC'
+        elif period == 'h':
+            return f'{amount} hours ago UTC'
+        elif period == 'd':
+            return f'{amount} days ago UTC'
+        elif period == 'w':
+            return f'{amount} weeks ago UTC'
+        elif period == 'M':
+            return f'{amount} months ago UTC'
+        else:
+            raise Exception(f'Error: invalid interval:  {period}')
 
     async def start_candle_streams(self, client, db):
         bm = BinanceSocketManager(client)
@@ -75,7 +111,7 @@ class BinanceBot():
                  base_assets=['BTC', ],
                  quote_assets=['USDT', ],
                  intervals=['1m', ],
-                 windowsize=200
+                 windowsize=10
                  ):
 
         self.data = DataBase()
