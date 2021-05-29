@@ -5,7 +5,6 @@ Minimal market data fetcher in the making...
 """
 import os
 import asyncio
-import json
 
 from binance import AsyncClient
 
@@ -26,6 +25,8 @@ class DataBase():
         self.intervals = None
         self.windowsize = None
 
+        self.symbols = set()
+
 
 class _Api():
     """Interface with Binance through binance-python"""
@@ -38,8 +39,15 @@ class _Api():
 
     async def start(self, db):
         client = await AsyncClient.create(self.key, self.secret)
-        res = await client.get_exchange_info()
-        print(json.dumps(res, indent=2))
+        tickers = await client.get_all_tickers()
+
+        for t in tickers:
+            for qa in db.quote_assets:
+                if t['symbol'].endswith(qa):
+                    starts_with = t['symbol'][:-len(qa)]
+                    if starts_with in db.base_assets:
+                        db.symbols.add(t['symbol'])
+
         await client.close_connection()
 
 
@@ -47,22 +55,22 @@ class BinanceBot():
     """Public API exposed by bbot."""
 
     def __init__(self, api_key, api_secret,
-                 base_assets=["BTC", ],
-                 quote_assets=["USDT", ],
-                 intervals=["1m", ],
+                 base_assets=['BTC', ],
+                 quote_assets=['USDT', ],
+                 intervals=['1m', ],
                  windowsize=200
                  ):
 
         self.data = DataBase()
-        self.data.base_assets = base_assets
-        self.data.quote_assets = quote_assets
+        self.data.base_assets = [a.upper() for a in base_assets]
+        self.data.quote_assets = [q.upper() for q in quote_assets]
         self.data.intervals = intervals
         self.data.windowsize = windowsize
 
         self._api = _Api(api_key, api_secret, self.data)
 
 
-if __name__ == "__main__":
-    key = os.environ.get("binance_api")
-    secret = os.environ.get("binance_secret")
+if __name__ == '__main__':
+    key = os.environ.get('binance_api')
+    secret = os.environ.get('binance_secret')
     bot = BinanceBot(key, secret)
