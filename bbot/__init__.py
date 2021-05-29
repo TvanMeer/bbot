@@ -6,13 +6,16 @@ Minimal market data fetcher in the making...
 import os
 import asyncio
 
-from binance import AsyncClient
+from binance import AsyncClient, BinanceSocketManager
 
 
 class Coin():
     """All realtime data belonging to a symbol, such as BTCUSDT."""
 
     def __init__(self, symbol):
+        pass
+
+    def add_candle(self, raw):
         pass
 
 
@@ -26,6 +29,7 @@ class DataBase():
         self.windowsize = None
 
         self.symbols = set()
+        self.coins = {}
 
 
 class _Api():
@@ -48,7 +52,20 @@ class _Api():
                     if starts_with in db.base_assets:
                         db.symbols.add(t['symbol'])
 
-        await client.close_connection()
+        for s in db.symbols:
+            db.coins[s] = Coin(s)
+
+        await self.start_candle_streams(client, db)
+
+    async def start_candle_streams(self, client, db):
+        bm = BinanceSocketManager(client)
+        chanels = [s.lower() + '@kline_1m' for s in db.symbols]
+        ms = bm.multiplex_socket(chanels)
+        async with ms as mscm:
+            while True:
+                msg = await mscm.recv()
+                symbol = msg['data']['s']
+                db.coins[symbol].add_candle(msg)
 
 
 class BinanceBot():
