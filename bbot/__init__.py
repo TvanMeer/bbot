@@ -14,12 +14,14 @@ class Coin():
 
     def __init__(self, symbol, intervals, windowsize):
         self.symbol = symbol
-        self.intervals = intervals
+        self.intervals = set(intervals)
         self.windowsize = windowsize
         self.df_names = ['candles_' + iv for iv in intervals]
         [setattr(self, df, []) for df in self.df_names]
 
+        # private vars
         self._historic_frames_downloaded = 0
+        self.last_1m_open_time = None
 
     def add_historical_candles(self, interval, raw):
 
@@ -51,8 +53,8 @@ class Coin():
         if self._historic_frames_downloaded == len(self.intervals):
             pass
         d = raw['data']['k']
-        symbol = raw['data']['s']
-        closed = d['x']
+        #symbol = raw['data']['s']
+        #closed = bool(d['x'])
         candle = {
             'open_time':   float(d['t']),
             'open':        float(d['o']),
@@ -66,7 +68,11 @@ class Coin():
             'tbba_volume': float(d['V']),
             'tbqa_volume': float(d['Q'])
         }
-        print(candle)  # TODO
+        # TODO
+        print(candle)
+
+        # for iv in self.intervals:
+        #self._verify_and_insert(candle, iv)
 
 
 class DataBase():
