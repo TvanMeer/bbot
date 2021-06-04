@@ -10,7 +10,8 @@ class Options():
     def __init__(self, mode='STREAM',
                  base_assets=['BTC', ],
                  quote_assets=['USDT', ],
-                 windows={'1m': 200, '1d': 10}):
+                 windows={'1m': 200, '1d': 10}
+                 ):
 
         self.mode = self._verify_mode(mode)
         self.base_assets = self._verify_base_assets(base_assets)
