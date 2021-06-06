@@ -6,13 +6,9 @@ A simple framework to build Binance spot trading bots
 
 ## Description
 
----
-
 Bbot is a microframework for building homebrew Binance trade bots. It provides a higher level of abstraction on top of [python-binance](https://python-binance.readthedocs.io/en/latest/index.html). Bbot streams [candlestick data](https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams) from Binance and provides basic functionality to work with this data and act upon changes in realtime.
 
 ## Features
-
----
 
 - Download historical candlestick data and update it realtime through a websocket.
 - Do this for many timeframes simultaniously, like 2s, 1m and 15m timeframes.
@@ -21,17 +17,13 @@ Bbot is a microframework for building homebrew Binance trade bots. It provides a
 - Automatic conversion to dictionaries, Pandas timeseries or Numpy array.
 - Automatic data integrity checking and safety guards on trading behavior.
 - Feature engineering pipeline.
-- Build, analize and manage trade strategies in real time.
+- Build, analyze and manage trade strategies in real time.
 
 ## Installation
-
----
 
 TODO
 
 ## Usage
-
----
 
 ### Step 1 - Set options
 
@@ -70,7 +62,8 @@ Possible options:
 
 | Parameter    | Options                                     | Description                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------ | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| mode         | `'HISTORY'`                                 | Download only historical candle data. Do not start realtime datastream.                                                                                                                                                                                                                                                                                                                                        |
+| mode         | `'DEBUG'`                                   | Load data from disk or download and save it. If data on disk is found, than do not make a connection with Binance. Use this if you are not interested in the data yet. This will use old data as 'dummy' data.                                                                                                                                                                                                 |
+|              | `'HISTORY'`                                 | Download only historical candle data. Do not start realtime datastream.                                                                                                                                                                                                                                                                                                                                        |
 |              | `'STREAM'`                                  | Download historical candle data and update this data realtime through a websocket.                                                                                                                                                                                                                                                                                                                             |
 |              | `'PAPER'`                                   | Like STREAM, but also simulate trading mode without actually starting a trade client.                                                                                                                                                                                                                                                                                                                          |
 |              | `'TESTNET'`                                 | Like PAPER, but papertrade on the Binance Testnet. Useful if you want to test the trade client.                                                                                                                                                                                                                                                                                                                |
