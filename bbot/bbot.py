@@ -1,0 +1,8 @@
+"""
+
+Main
+
+"""
+
+class Bot():
+    pass
