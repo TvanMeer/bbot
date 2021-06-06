@@ -7,10 +7,10 @@ Public API to set options of bbot.
 
 class Options():
 
-    def __init__(self, mode='STREAM',
+    def __init__(self, mode='PAPER',
                  base_assets=['BTC', ],
                  quote_assets=['USDT', ],
-                 windows={'1m': 200, '1d': 10}
+                 windows={'1m': 500, '15m': 200}
                  ):
 
         self.mode = self._verify_mode(mode)
@@ -99,7 +99,7 @@ class Options():
     def _verify_windows(self, windows):
 
         possible_windows = ['2s', '30s', '1m', '3m', '5m', '15m', '30m',
-                            '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3d', '1w', '1m']
+                            '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3d', '1w', '1M']
 
         e = '''Invalid input for bbot option 'windows'.
             Should be a dict, with k=interval and v=windowsize.
