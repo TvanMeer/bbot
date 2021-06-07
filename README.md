@@ -57,8 +57,16 @@ Possible options:
 
 ### Step 2 - Start Bbot
 
-Create an instance of the `bbot.Bot()` class with the options specified in step 1.  
-Add your credentials to use the Binance API.
+Create an instance of the `bbot.Bot()` class with the options specified in step 1.
+
+```
+from bbot import Bot
+
+bot = Bot(options)
+
+```
+
+You can optionally connect to a testaccount or regular account. This is mandatory in mode TESTNET or TRADE.
 
 ```
 from bbot import Bot
@@ -67,7 +75,7 @@ from bbot import Bot
 key    = 'djeZKZM5fThTGFIWNVJvyHzkQJfzbMCpACNgI8AVYmcT52hBgct3mikj3tZ7AXig'
 secret = 'TEPbhxIlqXsjaIJ45TwN86b01lt3XOe40WcAWdT4v0gghDrf7Tw8nV6WG4ohSb0v'
 
-bot    = Bot(api_key=key, api_secret=secret, options=options)
+bot    = Bot(options, api_key=key, api_secret=secret)
 
 ```
 
