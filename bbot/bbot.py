@@ -6,15 +6,9 @@ Main
 
 class Bot():
 
-    def __init__(options):
+    def __init__(self, options):
         
-        mode         = options.mode
-        base_assets  = options.base_assets
-        quote_assets = options.quote_assets
-        windows      = options.windows
+        self.__options = options
 
-        # Get through API
-        all_pairs    = {}
-        pairs        = {}
-
-        #TODO: shield all attrs with getters and setters
+        self.all_pairs = {}
+        self.pairs     = {}

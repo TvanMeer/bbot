@@ -32,29 +32,12 @@ Start by specifying the options of Bbot by creating an instance of the `bbot.Opt
 ```
 from bbot import Options
 
-options = Options(mode = 'PAPER',
-                  base_assets  = ['BTC',],
-                  quote_assets = ['USDT',],
-                  windows = {'1m' : 500,
-                             '15m': 200
-                             }
+
+options = Options(mode         = 'PAPER',
+                  base_assets  = [ 'BTC', 'ETH' ],
+                  quote_assets = [ 'USDT', ],
+                  windows      = { '1m':500, '15m':200 }
                   )
-
-```
-
-You can also set the options like this:
-
-```
-from bbot import Options
-
-options = Options()
-
-options.mode = 'STREAM'
-options.base_assets  = ['BTC',]
-options.quote_assets = ['USDT',]
-options.windows = {'1m' : 500,
-                   '15m': 200
-                   }
 
 ```
 
