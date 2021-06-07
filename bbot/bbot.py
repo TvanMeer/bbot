@@ -23,6 +23,10 @@ class Bot():
         self.symbols = set()
         self.pairs   = {}
 
+        if options.mode in ['TESTNET', 'TRADE']:
+            if api_key == ' ' or api_secret == ' ':
+                raise Exception(f'Binance API credentials required in {options.mode} mode')
+
         # Start client in another thread
         loop = asyncio.get_event_loop()
         self.binance_client = threading.Thread(target = self._other_thread, 
