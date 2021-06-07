@@ -23,7 +23,7 @@ class Bot():
         self.symbols = set()
         self.pairs   = {}
 
-        # Start client in other thread
+        # Start client in another thread
         loop = asyncio.get_event_loop()
         self.binance_client = threading.Thread(target = self._other_thread, 
                                                args = (loop,)

@@ -11,10 +11,10 @@ Bbot is a microframework for building homebrew Binance trade bots. It provides a
 ## Features
 
 - Download historical candlestick data and update it realtime through a websocket.
-- Do this for many timeframes simultaniously, like 2s, 1m and 15m timeframes.
+- Do this for many intervals simultaniously, like 2s, 1m and 15m intervals.
 - Work with many assets simultaniously.
 - Automatic parsing, cleaning and type conversion.
-- Automatic conversion to dictionaries, Pandas timeseries or Numpy array.
+- Conversion to dictionaries, Pandas timeseries or Numpy array.
 - Automatic data integrity checking and safety guards on trading behavior.
 - Feature engineering pipeline.
 - Build, analyze and manage trade strategies in real time.
