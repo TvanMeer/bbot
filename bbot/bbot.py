@@ -3,6 +3,8 @@
 Main
 
 """
+import time
+
 import threading
 import asyncio
 from binance import AsyncClient, BinanceSocketManager
@@ -20,27 +22,22 @@ class Bot():
         self.__api_secret   = api_secret
         self.__all_symbols  = set()
         self.__chanels      = []
-        self.symbols = set()
-        self.pairs   = {}
+        self.symbols        = set()
+        self.pairs          = {}
 
         if options.mode in ['TESTNET', 'TRADE']:
             if api_key == ' ' or api_secret == ' ':
                 raise Exception(f'Binance API credentials required in {options.mode} mode')
 
         # Start client in another thread
-        loop = asyncio.get_event_loop()
-        self.binance_client = threading.Thread(target = self._other_thread, 
-                                               args = (loop,)
-                                               )
-        self.binance_client.start()
-        self.binance_client.join()
+        self._binance_client = threading.Thread(target = self._other_thread)
+        self._binance_client.start()
+    
 
+    def _other_thread(self):
 
-    def _other_thread(self, loop):
-        try:
-            loop.run_until_complete(self._start_async_client())
-        finally:
-            loop.close()
+        self.loop = asyncio.new_event_loop()
+        self.loop.run_until_complete(self._start_async_client())
 
     async def _start_async_client(self):
 
@@ -61,14 +58,12 @@ class Bot():
 
         # Initialize self.pairs
         for s in self.symbols:
-            self.pairs[s] = Pair(s)
+            self.pairs[s] = Pair(s, self.__options)
 
         # Concurrent execution of history download and streams
         __hist = asyncio.create_task(self._download_history(client))
         __cs   = asyncio.create_task(self._start_candle_streams(client))
         _      = await asyncio.gather(__hist, __cs)
-
-        await client.close_connection()
 
 
     async def _download_history(self, client):
@@ -108,6 +103,15 @@ class Bot():
                 symbol = msg['data']['s']
                 self.pairs[symbol].add_candle(msg)
 
+    
+    def stop(self):
+        # TODO: throws ugly exception
+        self.loop.stop()
+        self._binance_client.join()
+
+        
+
+
 
 
 # test ------------------------------------------------------
@@ -120,3 +124,19 @@ if __name__ == '__main__':
                   )
 
     bot    = Bot(options)
+    
+    
+    
+    time.sleep(3)
+    print('Slept 3 seconds...')
+    time.sleep(2)
+    print('Slept 2 seconds...')
+
+    # Test stop function
+    bot.stop()
+
+    print('Runs succesfully after termination..............')
+
+    # TODO: model training func as param in options.
+    # This is being executed as asyncio.as_thread in hist and stream
+    # gather
