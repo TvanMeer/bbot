@@ -79,6 +79,14 @@ bot    = Bot(options, api_key=key, api_secret=secret)
 
 ```
 
+Gracefully shutdown we you're done:
+
+```
+
+bot.stop()
+
+```
+
 ### Step 3 - Data exploration
 
 Let's explore the data Bbot provides to work with.  

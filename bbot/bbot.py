@@ -20,6 +20,7 @@ class Bot():
         self.__options      = options
         self.__api_key      = api_key
         self.__api_secret   = api_secret
+        self.__shutdown     = False
         self.__all_symbols  = set()
         self.__chanels      = []
         self.symbols        = set()
@@ -30,7 +31,7 @@ class Bot():
                 raise Exception(f'Binance API credentials required in {options.mode} mode')
 
         # Start client in another thread
-        self._binance_client = threading.Thread(target = self._other_thread)
+        self._binance_client = threading.Thread(target = self._other_thread, daemon=True)
         self._binance_client.start()
     
 
@@ -39,11 +40,12 @@ class Bot():
         self.loop = asyncio.new_event_loop()
         self.loop.run_until_complete(self._start_async_client())
 
+
     async def _start_async_client(self):
 
         # Connect to Binance
-        client  = await AsyncClient.create(api_key=self.__api_key, 
-                                           api_secret=self.__api_secret)
+        client  = await AsyncClient.create(api_key = self.__api_key, 
+                                           api_secret = self.__api_secret)
         
         # Pick pairs of interest
         tickers = await client.get_all_tickers()
@@ -98,15 +100,16 @@ class Bot():
         bm = BinanceSocketManager(client)
         ms = bm.multiplex_socket(self.__chanels)
         async with ms as stream:
-            while True:
+            while self.__shutdown == False:
                 msg = await stream.recv()
                 symbol = msg['data']['s']
                 self.pairs[symbol].add_candle(msg)
 
+        await client.close_connection()
+
     
     def stop(self):
-        # TODO: throws ugly exception
-        self.loop.stop()
+        self.__shutdown = True
         self._binance_client.join()
 
         
