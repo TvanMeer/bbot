@@ -65,7 +65,7 @@ class Bot():
         # Concurrent execution of history download and streams
         __hist = asyncio.create_task(self._download_history(client))
         __cs   = asyncio.create_task(self._start_candle_streams(client))
-        _      = await asyncio.gather(__hist, __cs)
+        _      = await asyncio.gather(__cs, __hist)
 
 
     async def _download_history(self, client):
@@ -75,7 +75,7 @@ class Bot():
                     continue
                 timestr = self._to_timestring(w[0], w[1])
                 candles = await client.get_historical_klines(s, w[0], timestr)
-                self.pairs[s].add_historical_window(w[0], candles)
+                self.pairs[s]._add_historical_window(w[0], candles)
 
 
     def _to_timestring(self, interval, windowsize):
@@ -103,7 +103,7 @@ class Bot():
             while self.__shutdown == False:
                 msg = await stream.recv()
                 symbol = msg['data']['s']
-                self.pairs[symbol].add_candle(msg)
+                self.pairs[symbol]._add_candle(msg)
 
         await client.close_connection()
 
@@ -143,3 +143,5 @@ if __name__ == '__main__':
     # TODO: model training func as param in options.
     # This is being executed as asyncio.as_thread in hist and stream
     # gather
+
+    # Truc met shutdown werkt ook voor andere functies

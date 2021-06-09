@@ -79,7 +79,7 @@ bot    = Bot(options, api_key=key, api_secret=secret)
 
 ```
 
-Gracefully shutdown we you're done:
+Gracefully shutdown when finished:
 
 ```
 
