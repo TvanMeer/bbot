@@ -17,14 +17,14 @@ class Bot():
     
     def __init__(self, options, api_key=' ', api_secret=' '):
         
-        self.__options      = options
-        self.__api_key      = api_key
-        self.__api_secret   = api_secret
-        self.__shutdown     = False
-        self.__all_symbols  = set()
-        self.__chanels      = []
-        self.symbols        = set()
-        self.pairs          = {}
+        self._options      = options
+        self.__api_key     = api_key
+        self.__api_secret  = api_secret
+        self._shutdown     = False
+        self._all_symbols  = set()
+        self._chanels      = []
+        self.symbols       = set()
+        self.pairs         = {}
 
         if options.mode in ['TESTNET', 'TRADE']:
             if api_key == ' ' or api_secret == ' ':
@@ -49,28 +49,28 @@ class Bot():
         
         # Pick pairs of interest
         tickers = await client.get_all_tickers()
-        [self.__all_symbols.add(s['symbol']) for s in tickers]
-        for qa in self.__options.quote_assets:
-            for s in self.__all_symbols:
+        [self._all_symbols.add(s['symbol']) for s in tickers]
+        for qa in self._options.quote_assets:
+            for s in self._all_symbols:
                 if s.endswith(qa):
                     starts_with = s[:-len(qa)]
-                    if starts_with in self.__options.base_assets:
+                    if starts_with in self._options.base_assets:
                         self.symbols.add(s)
-                        self.__chanels.append(s.lower() + '@kline_1m')
+                        self._chanels.append(s.lower() + '@kline_1m')
 
         # Initialize self.pairs
         for s in self.symbols:
-            self.pairs[s] = Pair(s, self.__options)
+            self.pairs[s] = Pair(s, self._options)
 
         # Concurrent execution of history download and streams
         __hist = asyncio.create_task(self._download_history(client))
         __cs   = asyncio.create_task(self._start_candle_streams(client))
-        _      = await asyncio.gather(__cs, __hist)
+        __     = await asyncio.gather(__cs, __hist)
 
 
     async def _download_history(self, client):
         for s in self.symbols:
-            for w in self.__options.windows.items():
+            for w in self._options.windows.items():
                 if w[0] == '2s':
                     continue
                 timestr = self._to_timestring(w[0], w[1])
@@ -98,18 +98,18 @@ class Bot():
     
     async def _start_candle_streams(self, client):
         bm = BinanceSocketManager(client)
-        ms = bm.multiplex_socket(self.__chanels)
+        ms = bm.multiplex_socket(self._chanels)
         async with ms as stream:
-            while self.__shutdown == False:
+            while self._shutdown == False:
                 msg = await stream.recv()
                 symbol = msg['data']['s']
-                self.pairs[symbol]._add_candle(msg)
+                self.pairs[symbol]._parse_candle(msg)
 
         await client.close_connection()
 
     
     def stop(self):
-        self.__shutdown = True
+        self._shutdown = True
         self._binance_client.join()
 
         
@@ -132,8 +132,8 @@ if __name__ == '__main__':
     
     time.sleep(3)
     print('Slept 3 seconds...')
-    time.sleep(2)
-    print('Slept 2 seconds...')
+    time.sleep(60)
+    print('Slept 60 seconds...')
 
     # Test stop function
     bot.stop()
@@ -144,4 +144,5 @@ if __name__ == '__main__':
     # This is being executed as asyncio.as_thread in hist and stream
     # gather
 
-    # Truc met shutdown werkt ook voor andere functies
+    # Trick with shutdown also works for other functions nested within
+    # candlestream while-loop
