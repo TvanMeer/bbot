@@ -17,14 +17,14 @@ class Bot():
     
     def __init__(self, options, api_key=' ', api_secret=' '):
         
+        self.symbols       = set()
+        self.pairs         = {}
         self._options      = options
         self.__api_key     = api_key
         self.__api_secret  = api_secret
         self._shutdown     = False
         self._all_symbols  = set()
         self._chanels      = []
-        self.symbols       = set()
-        self.pairs         = {}
 
         if options.mode in ['TESTNET', 'TRADE']:
             if api_key == ' ' or api_secret == ' ':
@@ -38,6 +38,7 @@ class Bot():
     def _other_thread(self):
 
         self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
         self.loop.run_until_complete(self._start_async_client())
 
 
@@ -65,13 +66,13 @@ class Bot():
         # Concurrent execution of history download and streams
         __hist = asyncio.create_task(self._download_history(client))
         __cs   = asyncio.create_task(self._start_candle_streams(client))
-        __     = await asyncio.gather(__cs, __hist)
+        await __cs, __hist
 
 
     async def _download_history(self, client):
         for s in self.symbols:
             for w in self._options.windows.items():
-                if w[0] == '2s':
+                if w[0] == '2s' or w[0] == '30s':
                     continue
                 timestr = self._to_timestring(w[0], w[1])
                 candles = await client.get_historical_klines(s, w[0], timestr)
@@ -132,8 +133,8 @@ if __name__ == '__main__':
     
     time.sleep(3)
     print('Slept 3 seconds...')
-    time.sleep(60)
-    print('Slept 60 seconds...')
+    time.sleep(6)
+    print('Slept 6 seconds...')
 
     # Test stop function
     bot.stop()

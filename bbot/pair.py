@@ -105,9 +105,10 @@ class Pair():
 
     def _insert_candle(self, candle, window, interval):
 
+        # Verify candle and calculate close time
         candle = self._verify_new_candle(window, interval, candle)
         candle['close_time'] = candle['open_time'] + (self._ot_delta[interval] -1)
-        # Roll window
+        # Roll window and append candle
         window.append(candle)
         del window[0]
         setattr(self, 'candles_' + interval, window)
