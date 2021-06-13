@@ -74,9 +74,9 @@ class Options():
     
     def _verify_windows(self, windows):
 
-        possible_windows = ['2s', '30s', '1m', '3m', '5m', '15m', '30m',
-                            '1h', '2h', '4h', '6h', '8h', '12h', '1d', 
-                            '3d', '1w', '1M']
+        possible_windows = ['2s', '1m', '3m', '5m', '15m', '30m',
+                            '1h', '2h', '4h', '6h', '8h', '12h', 
+                            '1d', '3d', '1w', '1M']
 
         e = '''Invalid input for bbot option 'windows'.
             Should be a dict, with k=interval and v=windowsize.

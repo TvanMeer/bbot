@@ -72,7 +72,7 @@ class Bot():
     async def _download_history(self, client):
         for s in self.symbols:
             for w in self._options.windows.items():
-                if w[0] == '2s' or w[0] == '30s':
+                if w[0] == '2s':
                     continue
                 timestr = self._to_timestring(w[0], w[1])
                 candles = await client.get_historical_klines(s, w[0], timestr)
