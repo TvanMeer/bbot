@@ -3,14 +3,46 @@
 Public API to set options of bbot.
 
 """
+from enum import Enum
+from typing import Optional, Union, Dict, List
+
+class Interval(Enum):
+    # name = interval, value = time in ms
+    s2:  2000
+    m1:  1
+    m3:  2
+    m5:  3
+    m15: 4
+    m30: 5
+    h1:  6
+    h2:  7
+    h4:  8
+    h6:  9
+    h8:  10
+    h12: 11
+    d1:  12
+    d3:  13
+    w1:  14
+    M1:  15
+
+class Mode(Enum):
+    DEBUG:   0
+    HISTORY: 1
+    STREAM:  2
+    PAPER:   3
+    TESTNET: 4
+    TRADE:   5
+
 class Options():
     
     def __init__(self, 
-                 mode        = 'PAPER',
-                 base_assets =['BTC', ],
-                 quote_assets=['USDT', ],
-                 windows     ={'1m' : 500, 
-                               '15m': 200}
+                 mode:         Optional[Mode] = Mode.DEBUG,
+                 base_assets:  Optional[Union[str, List[str]]] = 'BTC',
+                 quote_assets: Optional[Union[str, List[str]]] = 'USDT',
+                 windows:      Optional[Dict[Interval, int]] = {
+                     Interval.m1 : 500, 
+                     Interval.m15: 200
+                    }
                  ):
 
         self.mode         = self._verify_mode(mode)
@@ -19,17 +51,14 @@ class Options():
         self.windows      = self._verify_windows(windows)
 
 
-    def _verify_mode(self, mode):
+    # TODO -----
+    def _verify_mode(self, mode: Mode):
+        
         m = mode.upper()
-        if m in {'DEBUG', 
-                 'HISTORY', 
-                 'STREAM', 
-                 'PAPER', 
-                 'TESTNET', 
-                 'TRADE'}:
-            return m
+        if m in set(m.value for m in Mode):
+            return mode
         else:
-            e = f'''Invalid input for bbot option `mode`.
+            e = '''Invalid input for bbot option `mode`.
             Choose either DEBUG, HISTORY, STREAM, PAPER, TESTNET or TRADE.'''
             raise Exception(e)
 
