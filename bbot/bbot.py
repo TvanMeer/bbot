@@ -13,12 +13,12 @@ class Bot():
         pass
 
     # Internal
-    def __init__(self) -> None:
-        self._create_client()
+    def __init__(self, options: options.Options) -> None:
+        self._create_client(options)
 
-    def _create_client(self) -> None:
-        self.bc = binance_client.BinanceClient()
-        print('client initialized...')
+    def _create_client(self, options: options.Options) -> None:
+        self.bc = binance_client.BinanceClient(options)
+        print('Client is running...')
 
 
 
