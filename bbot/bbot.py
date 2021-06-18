@@ -4,8 +4,8 @@ Main Bot class
 
 '''
 
-from . import options
-from client import binance_client
+from .options import Options
+from .client.binance_client import BinanceClient
 class Bot():
 
     # Public
@@ -13,11 +13,11 @@ class Bot():
         pass
 
     # Internal
-    def __init__(self, options: options.Options) -> None:
+    def __init__(self, options: Options) -> None:
         self._create_client(options)
 
-    def _create_client(self, options: options.Options) -> None:
-        self._bc = binance_client.BinanceClient(options)
+    def _create_client(self, options: Options) -> None:
+        self._bc = BinanceClient(options)
         print('Client is running...')
 
 
@@ -31,5 +31,5 @@ class Bot():
 # Test ------------------------
 if __name__ == '__main__':
 
-    options = options.Options()
+    options = Options()
     bot = Bot()
