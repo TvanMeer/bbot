@@ -130,3 +130,5 @@ dmypy.json
 
 # drawio
 /docs/bbot_internals.drawio
+#vscode
+.vscode/
