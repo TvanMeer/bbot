@@ -5,10 +5,11 @@ Database class: holds all Pairs.
 '''
 from typing import Dict, List, Set
 
-from .. import options
+from ..options import Options
+from .candle   import Candle
 
 class Database:
-    def __init__(self, options: options.Options):
+    def __init__(self, options: Options):
         self.options = options
 
     def _filter_symbols(self, symbols: Set) -> Set:
@@ -20,10 +21,10 @@ class Database:
     def _create_pairs(self, symbols: Set) -> None:
         pass
 
-    def _route_history(self, history: List[Dict[str, float]]) -> None:
+    def _route_history(self, history: List[Candle]) -> None:
         pass
 
-    def _route_candle(self, candle: Dict[str, float]) -> None:
+    def _route_candle(self, candle: Candle) -> None:
         pass
 
     def _process_user_event(self, user_event: Dict) -> None:

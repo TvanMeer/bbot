@@ -3,20 +3,22 @@
 Binance client implementation
 
 '''
-from typing import Any, Dict, List, Set
 
+from typing import Any, Dict, List, Set
 from binance import AsyncClient
 
-from . import base_client
-from .. import options
+from .base_client      import BaseClient
+from ..options         import Options
+from ..data.candle     import Candle
+from ..data.user_event import UserEvent
 
 
-class BinanceClient(base_client.BaseClient):
+class BinanceClient(BaseClient):
     
-    def __init__(self, options: options.Options):
+    def __init__(self, options: Options):
         super().__init__(options)
 
-    async def _create_async_client(options: options.Options) -> Any:
+    async def _create_async_client(options: Options) -> AsyncClient:
         client = await AsyncClient.create(api_key    = options.api_key, 
                                           api_secret = options.api_secret)
         return client
@@ -29,20 +31,20 @@ class BinanceClient(base_client.BaseClient):
     def _parse_all_symbols(raw: List[Dict]) -> Set[str]:
         pass
 
-    async def _download_history(client: AsyncClient) -> Any:
+    async def _download_history(client: AsyncClient) -> List[List]:
         pass
 
-    def _parse_history(raw: Any) -> List[Dict[str, float]]:
+    def _parse_history(raw: Any) -> List[Candle]:
         pass
 
     async def _start_candle_sockets(client: AsyncClient) -> None:
         pass
 
-    def _parse_candle(raw: Dict) -> Dict:
+    def _parse_candle(raw: Dict) -> Candle:
         pass
 
     async def _start_user_socket(client: AsyncClient) -> None:
         pass
 
-    def _parse_user_event(event: Any) -> Dict:
+    def _parse_user_event(event: Any) -> UserEvent:
         pass

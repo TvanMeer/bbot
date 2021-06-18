@@ -10,12 +10,15 @@ import abc
 import asyncio
 from typing import Any, Dict, List, Set
 
-from ..data import database
-from .. import options
+
+from ..data.candle     import Candle
+from ..data.database   import Database
+from ..data.user_event import UserEvent
+from ..options         import Options
 
 class BaseClient(metaclass=abc.ABCMeta):
 
-    def __init__(self, options: options.Options):
+    def __init__(self, options: Options):
 
         self.options = options
         self.db = self._create_database(self.options)
@@ -32,11 +35,11 @@ class BaseClient(metaclass=abc.ABCMeta):
         self._start_coroutines(filtered, self.client)
 
 
-    def _create_database(self, options: options.Options) -> database.Database:
-        return database.DataBase(options)
+    def _create_database(self, options: Options) -> Database:
+        return Database(options)
 
     @abc.abstractmethod
-    async def _create_async_client(options: options.Options) -> Any:
+    async def _create_async_client(options: Options) -> Any:
         ...
     
     @abc.abstractmethod
@@ -58,7 +61,7 @@ class BaseClient(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def _parse_history(raw: Any) -> List[Dict[str, float]]:
+    def _parse_history(raw: Any) -> List[Candle]:
         ...
 
     @abc.abstractmethod
@@ -66,7 +69,7 @@ class BaseClient(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def _parse_candle(raw: Dict) -> Dict:
+    def _parse_candle(raw: Dict) -> Candle:
         ...
 
     @abc.abstractmethod
@@ -74,5 +77,5 @@ class BaseClient(metaclass=abc.ABCMeta):
         ...
 
     @abc.abstractmethod
-    def _parse_user_event(event: Any) -> Dict:
+    def _parse_user_event(event: Any) -> UserEvent:
         ...
