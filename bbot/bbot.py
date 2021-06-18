@@ -17,7 +17,7 @@ class Bot():
         self._create_client(options)
 
     def _create_client(self, options: options.Options) -> None:
-        self.bc = binance_client.BinanceClient(options)
+        self._bc = binance_client.BinanceClient(options)
         print('Client is running...')
 
 
