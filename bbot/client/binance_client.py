@@ -31,13 +31,13 @@ class BinanceClient(BaseClient):
     def _parse_all_symbols(raw: List[Dict]) -> Set[str]:
         pass
 
-    async def _download_history(client: AsyncClient) -> List[List]:
+    async def _download_history(symbols: Set[str], client: AsyncClient) -> List[List]:
         pass
 
     def _parse_history(raw: Any) -> List[Candle]:
         pass
 
-    async def _start_candle_sockets(client: AsyncClient) -> None:
+    async def _start_candle_sockets(symbols: Set[str], client: AsyncClient) -> None:
         pass
 
     def _parse_candle(raw: Dict) -> Candle:

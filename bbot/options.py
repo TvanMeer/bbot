@@ -5,6 +5,7 @@ All options go inside Options class
 '''
 from enum import Enum
 from typing import Optional, Union, Dict, List
+from typeguard import typechecked
 
 class Interval(Enum):
     # name = interval, value = time in ms
@@ -31,6 +32,7 @@ class Mode(Enum):
     PAPER:   3
     TESTNET: 4
     TRADE:   5
+@typechecked
 class Options:
     
     def __init__(self, 
