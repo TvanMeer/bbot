@@ -1,11 +1,7 @@
-'''
-
-A single candle.
-
-'''
 from datetime import datetime
 
 class Candle:
+    """A single candle."""
 
     def __init__(self, 
                  event_time:                   datetime,
@@ -23,75 +19,138 @@ class Candle:
                  taker_buy_quote_asset_volume: float
                  ) -> None:
 
-        self.event_time                   = event_time
-        self.symbol                       = symbol
-        self.open_time                    = open_time
-        self.close_time                   = close_time
-        self.open_price                   = open_price
-        self.close_price                  = close_price
-        self.high_price                   = high_price
-        self.low_price                    = low_price
-        self.base_asset_volume            = base_asset_volume
-        self.n_trades                     = n_trades
-        self.quote_asset_volume           = quote_asset_volume
-        self.taker_buy_base_asset_volume  = taker_buy_base_asset_volume
-        self.taker_buy_quote_asset_volume = taker_buy_quote_asset_volume
-        self.missing                      = False
+        self._event_time                   = event_time
+        self._symbol                       = symbol
+        self._open_time                    = open_time
+        self._close_time                   = close_time
+        self._open_price                   = open_price
+        self._close_price                  = close_price
+        self._high_price                   = high_price
+        self._low_price                    = low_price
+        self._base_asset_volume            = base_asset_volume
+        self._n_trades                     = n_trades
+        self._quote_asset_volume           = quote_asset_volume
+        self._taker_buy_base_asset_volume  = taker_buy_base_asset_volume
+        self._taker_buy_quote_asset_volume = taker_buy_quote_asset_volume
 
-    
+        self._missing                      = False
+
+
+    # Attribute names
+
+    @property
+    def event_time(self) -> datetime:
+        return self._event_time
+
+    @property
+    def symbol(self) -> str:
+        return self._symbol
+
+    @property
+    def open_time(self) -> datetime:
+        return self._open_time
+
+    @property
+    def close_time(self) -> datetime:
+        return self._close_time
+
+    @property
+    def open_price(self) -> float:
+        return self._open_price
+
+    @property
+    def close_price(self) -> float:
+        return self._close_price
+
+    @property
+    def high_price(self) -> float:
+        return self._high_price
+
+    @property
+    def low_price(self) -> float:
+        return self._low_price
+
+    @property
+    def base_asset_volume(self) -> float:
+        return self._base_asset_volume
+
+    @property
+    def n_trades(self) -> int:
+        return self._n_trades
+
+    @property
+    def quote_asset_volume(self) -> float:
+        return self._quote_asset_volume
+
+    @property
+    def taker_buy_base_asset_volume(self) -> float:
+        return self._taker_buy_base_asset_volume
+
+    @property
+    def taker_buy_quote_asset_volume(self) -> float:
+        return self._taker_buy_quote_asset_volume
+        
+
+    @property
+    def missing(self) -> bool:
+        return self._missing
+
+    @missing.setter
+    def missing(self, missing_flag: bool) -> None:
+        self._missing = True
+
+
+
     # Shorthand attribute names
-    @property
-    def et(self):
-        return self.event_time
 
     @property
-    def sym(self):
-        return self.symbol
+    def et(self) -> datetime:
+        return self._event_time
 
     @property
-    def ot(self):
-        return self.open_time
+    def sym(self) -> str:
+        return self._symbol
 
     @property
-    def ct(self):
-        return self.close_time
+    def ot(self) -> datetime:
+        return self._open_time
 
     @property
-    def o(self):
-        return self.open_price
+    def ct(self) -> datetime:
+        return self._close_time
 
     @property
-    def c(self):
-        return self.close_price
+    def o(self) -> float:
+        return self._open_price
 
     @property
-    def h(self):
-        return self.high_price
+    def c(self) -> float:
+        return self._close_price
 
     @property
-    def l(self):
-        return self.low_price
+    def h(self) -> float:
+        return self._high_price
 
     @property
-    def bav(self):
-        return self.base_asset_volume
+    def l(self) -> float:
+        return self._low_price
 
     @property
-    def n(self):
-        return self.n_trades
+    def bav(self) -> float:
+        return self._base_asset_volume
 
     @property
-    def qav(self):
-        return self.quote_asset_volume
+    def n(self) -> int:
+        return self._n_trades
 
     @property
-    def tbbav(self):
-        return self.taker_buy_base_asset_volume
+    def qav(self) -> float:
+        return self._quote_asset_volume
 
     @property
-    def tbqav(self):
-        return self.taker_buy_quote_asset_volume
+    def tbbav(self) -> float:
+        return self._taker_buy_base_asset_volume
 
     @property
-    def m(self):
-        return self.missing
+    def tbqav(self) -> float:
+        return self._taker_buy_quote_asset_volume
