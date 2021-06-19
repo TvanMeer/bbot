@@ -1,9 +1,3 @@
-'''
-
-Database class: holds all Pairs.
-
-'''
-
 from typing import List, Set
 from typeguard import typechecked
 
@@ -14,12 +8,23 @@ from .user_event import UserEvent
 
 @typechecked
 class Database:
+    """Holds all Pairs with k = symbol and v = Pair object.
+    Also holds user_event objects in an array.
+    """
+
     def __init__(self, options: Options):
-        self.options     = options
-        self.pairs       = {}
-        self.user_events = []
+        self.options          = options
+        self.all_symbols      = None
+        self.selected_symbols = None
+        self.pairs            = {}
+        self.user_events      = []
+
 
     def _filter_symbols(self, symbols: Set) -> Set:
+        """Filters all symbols and returns symbols that have both
+        base and quote assets listed in Options.base_assets and 
+        Options.quote_assets.
+        """
 
         filtered = set()
         for qa in self.options.quote_assets:
@@ -29,8 +34,9 @@ class Database:
                     if starts_with in self.options.base_assets:
                         filtered.add(s)
         
+        self.selected_symbols = frozenset(filtered)
         self._create_pairs(filtered)
-        return filtered
+        return frozenset(filtered)
 
 
     def _create_pairs(self, symbols: Set) -> None:
@@ -41,8 +47,10 @@ class Database:
     def _route_history(self, history: List[Candle]) -> None:
         pass
 
+
     def _route_candle(self, candle: Candle) -> None:
         pass
+
 
     def _process_user_event(self, user_event: UserEvent) -> None:
         #...

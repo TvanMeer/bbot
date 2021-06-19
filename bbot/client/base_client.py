@@ -1,4 +1,3 @@
-import abc
 import asyncio
 from abc import abstractmethod, ABCMeta
 from typing import Any, Dict, List, Set
@@ -96,7 +95,7 @@ class BaseClient(metaclass=ABCMeta):
     def _parse_history(raw: List[Any]) -> None:
         """Takes window of raw historical candlestick data from 
         _download_history() and transforms it to a list of Candle objects.
-        Then passes it do db.route_history().
+        Then passes candle list to db.route_history().
         """
 
         raise NotImplementedError

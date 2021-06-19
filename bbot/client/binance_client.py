@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Set
 from binance import AsyncClient
 
 from .base_client      import BaseClient
-from ..options         import Options
+from ..options         import Interval, Options
 from ..data.candle     import Candle
 from ..data.user_event import UserEvent
 
@@ -39,25 +39,50 @@ class BinanceClient(BaseClient):
 
         all_symbols = set()
         [all_symbols.add(t['symbol']) for t in raw]
+        self.db.all_symbols = frozenset(all_symbols)
         return all_symbols
 
 
-    async def _download_history(symbols: Set[str], client: AsyncClient) -> None:
+    async def _download_history(self, symbols: Set[str], client: AsyncClient) -> None:
         """Downloads all windows of historical candlestick data, 
         as raw data in the format provided by the API. Then passes these
         windows to _parse_history().
         """
 
-        pass #TODO: through _parse_history()
-        
+        for s in symbols:
+            for w in self.options.windows.keys():
+                if w == Interval.s2:
+                    continue
+                timestr = self._to_timestring(w.name, w.value)
+                candles = await client.get_historical_klines(s, w.name, timestr)
+                self._parse_history(candles, s, Interval[w])
 
-    def _parse_history(raw: List[Any]) -> None:
+
+    @staticmethod
+    def _to_timestring(interval: Interval, windowsize: int) -> str:
+        """Helperfunction to download history with binance-python"""
+
+        amount = int(interval.name[1:]) * windowsize
+        time_frame = interval.name[0]
+        if time_frame == 'm':
+            return f'{amount} minutes ago UTC'
+        elif time_frame == 'h':
+            return f'{amount} hours ago UTC'
+        elif time_frame == 'd':
+            return f'{amount} days ago UTC'
+        elif time_frame == 'w':
+            return f'{amount} weeks ago UTC'
+        else:
+            raise Exception(f'Error: invalid interval:  {time_frame}')
+
+
+    def _parse_history(raw: List[Any], symbol: str, interval: Interval) -> None:
         """Takes window of raw historical candlestick data from 
         _download_history() and transforms it to a list of Candle objects.
-        Then passes it to db.route_history().
+        Then passes candle list to db.route_history().
         """
 
-        pass #TODO: self.db.
+        pass #TODO: self.db._route_history()
 
     async def _start_candle_sockets(symbols: Set[str], client: AsyncClient) -> None:
         """Starts one or multiple websockets that stream candlestick data.
