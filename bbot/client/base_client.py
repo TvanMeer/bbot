@@ -1,11 +1,3 @@
-'''
-
-Abstract interface for all clients
-
-Only Binance client is implemented.
-
-'''
-
 import abc
 import asyncio
 from typing import Any, Dict, List, Set
@@ -17,6 +9,9 @@ from ..data.user_event import UserEvent
 from ..options         import Options
 
 class BaseClient(metaclass=abc.ABCMeta):
+    """Abstract interface for all exchange clients.
+    Only for Binance a client is implemented.
+    """
 
     def __init__(self, options: Options):
         """All bootstrapping logic of client is defined here.

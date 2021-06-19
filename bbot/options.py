@@ -1,14 +1,9 @@
-'''
-
-All options go inside Options class
-
-'''
 from enum import Enum
-from typing import Optional, Union, Dict, List
+from typing import Union, Dict, List
 from typeguard import typechecked
 
 class Interval(Enum):
-    # name = interval, value = time in ms
+    """name = interval, value = time in milliseconds."""
     s2:  2000
     m1:  60000
     m3:  180000
@@ -26,6 +21,7 @@ class Interval(Enum):
     w1:  604800000
     M1:  2419200000 # TODO: varies
 class Mode(Enum):
+    """name = mode, value = mode id"""
     DEBUG:   0
     HISTORY: 1
     STREAM:  2
@@ -34,17 +30,24 @@ class Mode(Enum):
     TRADE:   5
 @typechecked
 class Options:
+    """Bot object requires an Options object at initialization.
+    This object is the public interface of Bbot.
+    """
     
     def __init__(self, 
-                 mode:         Optional[str]                   = 'DEBUG',
-                 base_assets:  Optional[Union[str, List[str]]] = 'BTC',
-                 quote_assets: Optional[Union[str, List[str]]] = 'USDT',
-                 windows:      Optional[Dict[str, int]]        = {
+                 api_key:      str                   = ' ',
+                 api_secret:   str                   = ' ',
+                 mode:         str                   = 'DEBUG',
+                 base_assets:  Union[str, List[str]] = 'BTC',
+                 quote_assets: Union[str, List[str]] = 'USDT',
+                 windows:      Dict[str, int]        = {
                      '1m'   : 500, 
                      '15m'  : 200
                     }
                  ):
 
+        self.api_key      = api_key
+        self.api_secret   = api_secret
         self.mode         = self._verify_clean_mode(mode)
         self.base_assets  = self._verify_clean_base_assets(base_assets)
         self.quote_assets = self._verify_clean_quote_assets(quote_assets)
