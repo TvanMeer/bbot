@@ -20,10 +20,18 @@ class Database:
         self.user_events = []
 
     def _filter_symbols(self, symbols: Set) -> Set:
+
+        filtered = set()
+        for qa in self.options.quote_assets:
+            for s in symbols:
+                if s.endswith(qa):
+                    starts_with = s[:-len(qa)]
+                    if starts_with in self.options.base_assets:
+                        filtered.add(s)
         
-        filtered = Set() #...
         self._create_pairs(filtered)
         return filtered
+
 
     def _create_pairs(self, symbols: Set) -> None:
         for s in symbols:

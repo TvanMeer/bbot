@@ -69,8 +69,8 @@ class BaseClient(metaclass=ABCMeta):
 
     @abstractmethod
     def _parse_all_symbols(raw: Any) -> Set[str]:
-        """Filters all sybols from the data that is obtained 
-        with _download_all_symbols().
+        """Filters and returns all symbols of pairs being traded
+        at the exchange from raw data and returns them as a set.
         """
 
         raise NotImplementedError

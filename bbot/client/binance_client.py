@@ -33,21 +33,13 @@ class BinanceClient(BaseClient):
 
 
     def _parse_all_symbols(self, raw: List[Dict]) -> Set[str]:
-        """Filters symbols from Binance ticker data and returns a set 
-        of symbols.
+        """Filters and returns all symbols of pairs being traded
+        at Binance from raw data and returns them as a set.
         """
 
         all_symbols = set()
         [all_symbols.add(t['symbol']) for t in raw]
-        filtered_symbols = set()
-        for qa in self.options.quote_assets:
-            for s in all_symbols:
-                if s.endswith(qa):
-                    starts_with = s[:-len(qa)]
-                    if starts_with in self.options.base_assets:
-                        filtered_symbols.add(s)
-
-        return filtered_symbols
+        return all_symbols
 
 
     async def _download_history(symbols: Set[str], client: AsyncClient) -> None:
@@ -56,7 +48,8 @@ class BinanceClient(BaseClient):
         windows to _parse_history().
         """
 
-        pass #TODO: return none en pipe door _parse_history()
+        pass #TODO: through _parse_history()
+        
 
     def _parse_history(raw: List[Any]) -> None:
         """Takes window of raw historical candlestick data from 
