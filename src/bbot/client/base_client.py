@@ -1,6 +1,6 @@
 import asyncio
 from abc import abstractmethod, ABCMeta
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, FrozenSet
 
 
 from ..data.candle     import Candle
@@ -33,9 +33,13 @@ class BaseClient(metaclass=ABCMeta):
         # 3
         self.client = self._create_async_client(self.options)
         # 4
-        raw      = self._download_all_symbols(self.client)
-        parsed   = self._parse_all_symbols(raw)
+        raw = self._download_all_symbols(self.client)
+
+        parsed = self._parse_all_symbols(raw)
+        self.db.all_symbols = parsed
+
         filtered = self.db._filter_symbols(parsed)
+        self.db.selected_symbols = filtered
         # 5
         self._start_coroutines(filtered, self.client)
 
@@ -48,6 +52,7 @@ class BaseClient(metaclass=ABCMeta):
 
         return Database(options)
 
+
     @abstractmethod
     async def _create_async_client(options: Options) -> Any:
         """Returns some client object. In the case of Binance this
@@ -57,6 +62,7 @@ class BaseClient(metaclass=ABCMeta):
 
         raise NotImplementedError
     
+
     @abstractmethod
     async def _download_all_symbols(self, client: Any) -> Any:
         """Downloads *some data* that contains all symbols of the 
@@ -66,15 +72,17 @@ class BaseClient(metaclass=ABCMeta):
 
         raise NotImplementedError
 
+
     @abstractmethod
-    def _parse_all_symbols(raw: Any) -> Set[str]:
+    def _parse_all_symbols(raw: Any) -> FrozenSet[str]:
         """Filters and returns all symbols of pairs being traded
         at the exchange from raw data and returns them as a set.
         """
 
         raise NotImplementedError
     
-    async def _start_coroutines(self, symbols: Set[str], client: Any) -> None:
+
+    async def _start_coroutines(self, symbols: FrozenSet[str], client: Any) -> None:
         _hist = asyncio.create_task(self._download_history(symbols, client))
         _cs   = asyncio.create_task(self._start_candle_sockets(symbols, client))
         _us   = asyncio.create_task(self._start_user_socket(client))
@@ -82,7 +90,7 @@ class BaseClient(metaclass=ABCMeta):
 
 
     @abstractmethod
-    async def _download_history(symbols: Set[str], client: Any) -> None:
+    async def _download_history(symbols: FrozenSet[str], client: Any) -> None:
         """Downloads all windows of historical candlestick data, 
         as raw data in the format provided by the API. Then passes these
         windows to _parse_history().

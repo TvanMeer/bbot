@@ -1,5 +1,6 @@
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, FrozenSet, List, Set
 from binance import AsyncClient
+import asyncio
 
 from .base_client      import BaseClient
 from ..options         import Interval, Options
@@ -23,7 +24,7 @@ class BinanceClient(BaseClient):
                                           api_secret = options.api_secret)
         return client
 
-    async def _download_all_symbols(self, client: AsyncClient) -> List[Dict]:
+    async def _download_all_symbols(client: AsyncClient) -> List[Dict]:
         """Downloads ticker data that contains all symbols of trading pairs
         on Binance. This is a list of dicts with k=symbol and v=close_price.
         """
@@ -32,18 +33,17 @@ class BinanceClient(BaseClient):
         return raw
 
 
-    def _parse_all_symbols(self, raw: List[Dict]) -> Set[str]:
+    def _parse_all_symbols(raw: List[Dict]) -> FrozenSet[str]:
         """Filters and returns all symbols of pairs being traded
         at Binance from raw data and returns them as a set.
         """
 
         all_symbols = set()
         [all_symbols.add(t['symbol']) for t in raw]
-        self.db.all_symbols = frozenset(all_symbols)
-        return all_symbols
+        return frozenset(all_symbols)
 
 
-    async def _download_history(self, symbols: Set[str], client: AsyncClient) -> None:
+    async def _download_history(self, symbols: FrozenSet[str], client: AsyncClient) -> None:
         """Downloads all windows of historical candlestick data, 
         as raw data in the format provided by the API. Then passes these
         windows to _parse_history().
@@ -56,9 +56,9 @@ class BinanceClient(BaseClient):
                 timestr = self._to_timestring(w.name, w.value)
                 candles = await client.get_historical_klines(s, w.name, timestr)
                 self._parse_history(candles, s, Interval[w])
+                asyncio.sleep(1)
 
 
-    @staticmethod
     def _to_timestring(interval: Interval, windowsize: int) -> str:
         """Helperfunction to download history with binance-python"""
 
@@ -82,7 +82,7 @@ class BinanceClient(BaseClient):
         Then passes candle list to pair._calc_window_rolls().
         """
 
-        pass #TODO: self.db._route_history()
+        pass #TODO: self.pair._calc_window_rolls()
 
     async def _start_candle_sockets(symbols: Set[str], client: AsyncClient) -> None:
         """Starts one or multiple websockets that stream candlestick data.
