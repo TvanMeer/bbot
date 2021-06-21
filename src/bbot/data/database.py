@@ -34,22 +34,16 @@ class Database:
                     if starts_with in self.options.base_assets:
                         filtered.add(s)
         
-        self.selected_symbols = frozenset(filtered)
-        self._create_pairs(filtered)
+        self._create_pairs(symbols, filtered)
         return frozenset(filtered)
 
 
-    def _create_pairs(self, symbols: Set) -> None:
-        for s in symbols:
+    def _create_pairs(self, all_symbols: Set, selected_symbols: Set) -> None:
+        
+        self.all_symbols = frozenset(all_symbols)
+        self.selected_symbols = frozenset(selected_symbols)
+        for s in selected_symbols:
             self.pairs[s] = Pair(self.options)
-
-
-    def _route_history(self, history: List[Candle]) -> None:
-        pass
-
-
-    def _route_candle(self, candle: Candle) -> None:
-        pass
 
 
     def _process_user_event(self, user_event: UserEvent) -> None:

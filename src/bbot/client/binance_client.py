@@ -79,7 +79,7 @@ class BinanceClient(BaseClient):
     def _parse_history(raw: List[Any], symbol: str, interval: Interval) -> None:
         """Takes window of raw historical candlestick data from 
         _download_history() and transforms it to a list of Candle objects.
-        Then passes candle list to db.route_history().
+        Then passes candle list to pair._calc_window_rolls().
         """
 
         pass #TODO: self.db._route_history()
