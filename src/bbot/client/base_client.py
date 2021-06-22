@@ -42,6 +42,7 @@ class BaseClient(metaclass=ABCMeta):
         self.db.selected_symbols = filtered
         # 5
         self._start_coroutines(filtered, self.client)
+        
 
 
     def _create_database(self, options: Options) -> Database:
@@ -103,7 +104,7 @@ class BaseClient(metaclass=ABCMeta):
     def _parse_history(raw: List[Any]) -> None:
         """Takes window of raw historical candlestick data from 
         _download_history() and transforms it to a list of Candle objects.
-        Then passes candle list to pair._calc_window_rolls().
+        Then passes Window object to pair._set_window(). 
         """
 
         raise NotImplementedError

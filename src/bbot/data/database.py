@@ -1,8 +1,7 @@
-from typing import List, Set
+from typing import FrozenSet
 from typeguard import typechecked
 
 from ..options   import Options
-from .candle     import Candle
 from .pair       import Pair
 from .user_event import UserEvent
 
@@ -20,7 +19,7 @@ class Database:
         self.user_events      = []
 
 
-    def _filter_symbols(self, symbols: Set) -> Set:
+    def _filter_symbols(self, symbols: FrozenSet) -> FrozenSet:
         """Filters all symbols and returns symbols that have both
         base and quote assets listed in Options.base_assets and 
         Options.quote_assets.
@@ -38,7 +37,7 @@ class Database:
         return frozenset(filtered)
 
 
-    def _create_pairs(self, all_symbols: Set, selected_symbols: Set) -> None:
+    def _create_pairs(self, all_symbols: FrozenSet, selected_symbols: FrozenSet) -> None:
         
         self.all_symbols = frozenset(all_symbols)
         self.selected_symbols = frozenset(selected_symbols)

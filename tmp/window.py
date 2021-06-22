@@ -64,11 +64,13 @@ class Window():
     # Internal functions to handle streams
     def _insert_new_candle(self, c: ParsedCandle) -> None:
         '''Pipeline for inserting a single new candle from a websocket'''
+
         vc = self._verify_new_candle(c)
         self._execute_insert(vc)
     
     def _update_last_candle(self, c: ParsedCandle) -> None:
         '''Pipeline for updating the last candle through a websocket'''
+        
         vc = self._verify_update(c)
         self._execute_update(vc)
     

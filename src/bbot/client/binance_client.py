@@ -79,10 +79,10 @@ class BinanceClient(BaseClient):
     def _parse_history(raw: List[Any], symbol: str, interval: Interval) -> None:
         """Takes window of raw historical candlestick data from 
         _download_history() and transforms it to a list of Candle objects.
-        Then passes candle list to pair._calc_window_rolls().
+        Then passes Window object to pair._set_window(). 
         """
 
-        pass #TODO: self.pair._calc_window_rolls()
+        pass #TODO
 
     async def _start_candle_sockets(symbols: Set[str], client: AsyncClient) -> None:
         """Starts one or multiple websockets that stream candlestick data.
