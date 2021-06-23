@@ -1,10 +1,11 @@
+from typing import Optional
 from datetime import datetime
 
 class Candle:
     """A single candle."""
 
     def __init__(self, 
-                 event_time:                   datetime,
+                 event_time:                   Optional(datetime),
                  symbol:                       str,
                  open_time:                    datetime, 
                  close_time:                   datetime,

@@ -1,6 +1,7 @@
-from typing import Any, Dict, FrozenSet, List, Set
+from typing import Any, Dict, FrozenSet, List
 from binance import AsyncClient
 import asyncio
+import datetime
 
 from .base_client      import BaseClient
 from ..options         import Interval, Options
@@ -61,7 +62,7 @@ class BinanceClient(BaseClient):
 
 
     def _to_timestring(interval: Interval, windowsize: int) -> str:
-        """Helperfunction to download history with binance-python"""
+        # Helperfunction to download history with binance-python.
 
         amount = int(interval.name[1:]) * windowsize
         time_frame = interval.name[0]
@@ -77,14 +78,35 @@ class BinanceClient(BaseClient):
             raise Exception(f'Error: invalid interval:  {time_frame}')
 
 
-    def _parse_historical_candle(raw: Any, symbol: str, interval: Interval) -> None:
+    def _parse_historical_candle(self, raw: List, symbol: str, interval: Interval) -> None:
         """Takes single candle from raw historical candlestick data coming 
         from _download_history() and transforms it to a Candle object.
         Then passes this candle object to the corresponding Window instance in 
         db.<Pair>.<Window>._add_historical_candle().
         """
 
-        pass #TODO
+        hc = Candle(None,                        # event_time
+                    symbol                       = symbol,
+                    open_time                    = self._ms_to_datetime(int(raw[0])),
+                    close_time                   = self._ms_to_datetime(int(raw[6])),
+                    open_price                   = float(raw[1]),
+                    close_price                  = float(raw[4]),
+                    high_price                   = float(raw[2]),
+                    low_price                    = float(raw[3]),
+                    base_asset_volume            = float(raw[5]),
+                    n_trades                     = float(raw[8]),
+                    quote_asset_volume           = float(raw[7]),
+                    taker_buy_base_asset_volume  = float(raw[9]),
+                    taker_buy_quote_asset_volume = float(raw[10])
+                    )
+
+        self.db.pairs[symbol].windows[symbol]._add_historical_candle(hc)
+        
+
+    def _ms_to_datetime(ms: int) -> datetime:
+        # Helperfunction that creates datetime object.
+        return datetime.datetime.fromtimestamp(ms / 1000.0, tz=datetime.timezone.utc)
+
 
     async def _start_candle_sockets(symbols: FrozenSet[str], client: AsyncClient) -> None:
         """Starts one or multiple websockets that stream candlestick data.

@@ -9,9 +9,10 @@ class Pair:
 
     def __init__(self, symbol, options: Options) -> None:
         self.symbol = symbol
-        self.windows = set()
-        if Interval.s2 in options.windows.keys:
-            self.windows.add(Window(Interval.s2, options.windows[Interval.s2]))
+        self.windows = {}
+
+        for iv, ws in options.windows.items():
+            self.windows[symbol] = Window(iv, ws)
 
 
     def _calc_window_rolls():
