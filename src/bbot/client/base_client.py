@@ -83,15 +83,15 @@ class BaseClient(metaclass=ABCMeta):
         raise NotImplementedError
     
 
-    async def _start_coroutines(self, symbols: FrozenSet[str], client: Any) -> None:
-        _hist = asyncio.create_task(self._download_history(symbols, client))
+    async def _start_coroutines(self, symbols: FrozenSet[str], client: Any, db: Database) -> None:
+        _hist = asyncio.create_task(self._download_history(symbols, client, db))
         _cs   = asyncio.create_task(self._start_candle_sockets(symbols, client))
         _us   = asyncio.create_task(self._start_user_socket(client))
         await _cs, _hist, _us
 
 
     @abstractmethod
-    async def _download_history(symbols: FrozenSet[str], client: Any) -> None:
+    async def _download_history(symbols: FrozenSet[str], client: Any, db: Database) -> None:
         """Downloads all windows of historical candlestick data, 
         as raw data in the format provided by the API. Then iterates through
         each window and passes a single candle to _parse_historical_candle().
@@ -101,7 +101,7 @@ class BaseClient(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def _parse_historical_candle(raw: Any, symbol: str, interval: Interval) -> None:
+    def _parse_historical_candle(raw: Any, symbol: str, interval: Interval, db: Database) -> None:
         """Takes single candle from raw historical candlestick data coming 
         from _download_history() and transforms it to a Candle object.
         Then passes this candle object to the corresponding Window instance in 

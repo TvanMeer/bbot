@@ -5,6 +5,7 @@ import datetime
 
 from .base_client      import BaseClient
 from ..options         import Interval, Options
+from ..data.database   import Database
 from ..data.candle     import Candle
 from ..data.user_event import UserEvent
 
@@ -44,7 +45,7 @@ class BinanceClient(BaseClient):
         return frozenset(all_symbols)
 
 
-    async def _download_history(self, symbols: FrozenSet[str], client: AsyncClient) -> None:
+    async def _download_history(self, symbols: FrozenSet[str], client: AsyncClient, db: Database) -> None:
         """Downloads all windows of historical candlestick data, 
         as raw data in the format provided by the API. Then iterates through
         each window and passes a single candle to _parse_historical_candle().
@@ -57,7 +58,7 @@ class BinanceClient(BaseClient):
                 timestr = self._to_timestring(w.name, w.value)
                 candles = await client.get_historical_klines(s, w.name, timestr)
                 for c in candles:
-                    self._parse_historical_candle(c, s, Interval[w])
+                    self._parse_historical_candle(c, s, Interval[w], db)
                 asyncio.sleep(1)
 
 
@@ -78,7 +79,7 @@ class BinanceClient(BaseClient):
             raise Exception(f'Error: invalid interval:  {time_frame}')
 
 
-    def _parse_historical_candle(self, raw: List, symbol: str, interval: Interval) -> None:
+    def _parse_historical_candle(self, raw: List, symbol: str, interval: Interval, db: Database) -> None:
         """Takes single candle from raw historical candlestick data coming 
         from _download_history() and transforms it to a Candle object.
         Then passes this candle object to the corresponding Window instance in 
@@ -100,7 +101,7 @@ class BinanceClient(BaseClient):
                     taker_buy_quote_asset_volume = float(raw[10])
                     )
 
-        self.db.pairs[symbol].windows[symbol]._add_historical_candle(hc)
+        db.pairs[symbol].windows[symbol]._add_historical_candle(hc)
         
 
     def _ms_to_datetime(ms: int) -> datetime:
