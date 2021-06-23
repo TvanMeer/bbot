@@ -1,4 +1,5 @@
 from ..options import Interval
+from .candle import Candle
 class Window:
     """This class holds only candles of a specific time interval."""
 
@@ -6,10 +7,13 @@ class Window:
                  interval: Interval,
                  windowsize: int
                  # data = {} ?
-                 #... constructed in client._parse_history
                  ):
         self.iv = interval
         
 
-    def _verify_full_window(self):
-        pass
+    def _add_historical_candle(self, candle: Candle):
+        """Verifies and adds a single historical candle passed by
+        client._parse_historical_candle().
+        """
+
+        pass #TODO

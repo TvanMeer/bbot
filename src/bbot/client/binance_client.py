@@ -45,8 +45,8 @@ class BinanceClient(BaseClient):
 
     async def _download_history(self, symbols: FrozenSet[str], client: AsyncClient) -> None:
         """Downloads all windows of historical candlestick data, 
-        as raw data in the format provided by the API. Then passes these
-        windows to _parse_history().
+        as raw data in the format provided by the API. Then iterates through
+        each window and passes a single candle to _parse_historical_candle().
         """
 
         for s in symbols:
@@ -55,7 +55,8 @@ class BinanceClient(BaseClient):
                     continue
                 timestr = self._to_timestring(w.name, w.value)
                 candles = await client.get_historical_klines(s, w.name, timestr)
-                self._parse_history(candles, s, Interval[w])
+                for c in candles:
+                    self._parse_historical_candle(c, s, Interval[w])
                 asyncio.sleep(1)
 
 
@@ -76,15 +77,16 @@ class BinanceClient(BaseClient):
             raise Exception(f'Error: invalid interval:  {time_frame}')
 
 
-    def _parse_history(raw: List[Any], symbol: str, interval: Interval) -> None:
-        """Takes window of raw historical candlestick data from 
-        _download_history() and transforms it to a list of Candle objects.
-        Then passes Window object to pair._set_window(). 
+    def _parse_historical_candle(raw: Any, symbol: str, interval: Interval) -> None:
+        """Takes single candle from raw historical candlestick data coming 
+        from _download_history() and transforms it to a Candle object.
+        Then passes this candle object to the corresponding Window instance in 
+        db.<Pair>.<Window>._add_historical_candle().
         """
 
         pass #TODO
 
-    async def _start_candle_sockets(symbols: Set[str], client: AsyncClient) -> None:
+    async def _start_candle_sockets(symbols: FrozenSet[str], client: AsyncClient) -> None:
         """Starts one or multiple websockets that stream candlestick data.
         Each socket streams data related to one pair. Only time interval 
         1 minute is streamed. Other intervals are calculated on the fly later.

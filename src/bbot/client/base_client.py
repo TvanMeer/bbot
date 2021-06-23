@@ -6,7 +6,7 @@ from typing import Any, Dict, List, FrozenSet
 from ..data.candle     import Candle
 from ..data.database   import Database
 from ..data.user_event import UserEvent
-from ..options         import Options
+from ..options         import Interval, Options
 
 class BaseClient(metaclass=ABCMeta):
     """Abstract interface for all exchange clients.
@@ -93,25 +93,26 @@ class BaseClient(metaclass=ABCMeta):
     @abstractmethod
     async def _download_history(symbols: FrozenSet[str], client: Any) -> None:
         """Downloads all windows of historical candlestick data, 
-        as raw data in the format provided by the API. Then passes these
-        windows to _parse_history().
+        as raw data in the format provided by the API. Then iterates through
+        each window and passes a single candle to _parse_historical_candle().
         """
     
         raise NotImplementedError
 
 
     @abstractmethod
-    def _parse_history(raw: List[Any]) -> None:
-        """Takes window of raw historical candlestick data from 
-        _download_history() and transforms it to a list of Candle objects.
-        Then passes Window object to pair._set_window(). 
+    def _parse_historical_candle(raw: Any, symbol: str, interval: Interval) -> None:
+        """Takes single candle from raw historical candlestick data coming 
+        from _download_history() and transforms it to a Candle object.
+        Then passes this candle object to the corresponding Window instance in 
+        db.<Pair>.<Window>._add_historical_candle().
         """
 
         raise NotImplementedError
 
 
     @abstractmethod
-    async def _start_candle_sockets(symbols: Set[str], client: Any) -> None:
+    async def _start_candle_sockets(symbols: FrozenSet[str], client: Any) -> None:
         """Starts one or multiple websockets that stream candlestick data."""
         
         raise NotImplementedError
