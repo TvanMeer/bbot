@@ -1,5 +1,5 @@
 from typing import Any, Dict, FrozenSet, List
-from binance import AsyncClient
+from binance import AsyncClient, BinanceSocketManager
 import asyncio
 import datetime
 
@@ -18,6 +18,14 @@ class BinanceClient(BaseClient):
         """Starts bootstrapping logic in parents constructor."""
 
         super().__init__(options)
+        self._shutdown_flag = False
+
+
+    def _shutdown(self):
+        """Shutdown client."""
+        self._shutdown_flag = True
+        # process.join()
+
 
     async def _create_async_client(options: Options) -> AsyncClient:
         """Returns a python-binance.AsyncClient object."""
@@ -109,13 +117,23 @@ class BinanceClient(BaseClient):
         return datetime.datetime.fromtimestamp(ms / 1000.0, tz=datetime.timezone.utc)
 
 
-    async def _start_candle_sockets(symbols: FrozenSet[str], client: AsyncClient) -> None:
+    async def _start_candle_sockets(self, symbols: FrozenSet[str], client: AsyncClient, db: Database) -> None:
         """Starts one or multiple websockets that stream candlestick data.
         Each socket streams data related to one pair. Only time interval 
         1 minute is streamed. Other intervals are calculated on the fly later.
+        Passes parsed candle to db.<Pair>._calc_window_rolls().
         """
 
-        pass #TODO
+        bm      = BinanceSocketManager(client)
+        chanels = [s.lower() + '@kline_1m' for s in symbols]
+        ms      = bm.multiplex_socket(chanels)
+        async with ms as stream:
+            while self._shutdown_flag == False:
+                msg    = await stream.recv()
+                symbol = msg['data']['s']
+                parsed = self._parse_candle(msg)
+                db.pairs[symbol]._calc_window_rolls(parsed)
+
 
     def _parse_candle(raw: Dict) -> Candle:
         """Takes raw candle data from a single candle and returns a Candle object."""

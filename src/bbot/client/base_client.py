@@ -53,6 +53,13 @@ class BaseClient(metaclass=ABCMeta):
 
         return Database(options)
 
+    
+    @abstractmethod
+    def _shutdown():
+        """Shutdown client."""
+        
+        raise NotImplementedError
+
 
     @abstractmethod
     async def _create_async_client(options: Options) -> Any:
@@ -112,14 +119,18 @@ class BaseClient(metaclass=ABCMeta):
 
 
     @abstractmethod
-    async def _start_candle_sockets(symbols: FrozenSet[str], client: Any) -> None:
-        """Starts one or multiple websockets that stream candlestick data."""
-        
+    async def _start_candle_sockets(symbols: FrozenSet[str], client: Any, db: Database) -> None:
+        """Starts one or multiple websockets that stream candlestick data.
+        Each socket streams data related to one pair. Only time interval 
+        1 minute is streamed. Other intervals are calculated on the fly later.
+        Passes parsed candle to db.<Pair>._calc_window_rolls().
+        """
+              
         raise NotImplementedError
 
 
     @abstractmethod
-    def _parse_candle(raw: Dict) -> Candle:
+    def _parse_candle(raw: Any) -> Candle:
         """Takes raw data of a single candle and returns a Candle object."""
         
         raise NotImplementedError
