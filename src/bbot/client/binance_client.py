@@ -94,16 +94,17 @@ class BinanceClient(BaseClient):
         db.<Pair>.<Window>._add_historical_candle().
         """
 
-        hc = Candle(None,                        # event_time
+        hc = Candle(event_time                   = None,
                     symbol                       = symbol,
                     open_time                    = self._ms_to_datetime(int(raw[0])),
                     close_time                   = self._ms_to_datetime(int(raw[6])),
+                    is_closed                    = True,
                     open_price                   = float(raw[1]),
                     close_price                  = float(raw[4]),
                     high_price                   = float(raw[2]),
                     low_price                    = float(raw[3]),
                     base_asset_volume            = float(raw[5]),
-                    n_trades                     = float(raw[8]),
+                    n_trades                     = int(raw[8]),
                     quote_asset_volume           = float(raw[7]),
                     taker_buy_base_asset_volume  = float(raw[9]),
                     taker_buy_quote_asset_volume = float(raw[10])
@@ -114,6 +115,7 @@ class BinanceClient(BaseClient):
 
     def _ms_to_datetime(ms: int) -> datetime:
         # Helperfunction that creates datetime object.
+
         return datetime.datetime.fromtimestamp(ms / 1000.0, tz=datetime.timezone.utc)
 
 
@@ -135,10 +137,26 @@ class BinanceClient(BaseClient):
                 db.pairs[symbol]._calc_window_rolls(parsed)
 
 
-    def _parse_candle(raw: Dict) -> Candle:
+    def _parse_candle(self, raw: Dict) -> Candle:
         """Takes raw candle data from a single candle and returns a Candle object."""
         
-        pass #TODO
+        d = raw['data']['k']
+        return Candle(event_time                   = self._ms_to_datetime(int(raw['data']['E'])),
+                      symbol                       =                          raw['data']['s'],
+                      open_time                    =           self._ms_to_datetime(int(d['t'])),
+                      close_time                   =           self._ms_to_datetime(int(d['T'])),
+                      is_closed                    =                               bool(d['x']),
+                      open_price                   =                              float(d['o']),
+                      close_price                  =                              float(d['c']),
+                      high_price                   =                              float(d['h']),
+                      low_price                    =                              float(d['l']),
+                      base_asset_volume            =                              float(d['v']),
+                      n_trades                     =                                int(d['n']),
+                      quote_asset_volume           =                              float(d['q']),
+                      taker_buy_base_asset_volume  =                              float(d['V']),
+                      taker_buy_quote_asset_volume =                              float(d['Q'])
+                      )
+
 
     async def _start_user_socket(client: AsyncClient) -> None:
         """Starts a websocket that listens to user events."""

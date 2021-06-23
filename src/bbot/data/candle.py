@@ -9,6 +9,7 @@ class Candle:
                  symbol:                       str,
                  open_time:                    datetime, 
                  close_time:                   datetime,
+                 is_closed:                    bool,
                  open_price:                   float, 
                  close_price:                  float,
                  high_price:                   float, 
@@ -24,6 +25,7 @@ class Candle:
         self._symbol                       = symbol
         self._open_time                    = open_time
         self._close_time                   = close_time
+        self._is_closed                    = is_closed
         self._open_price                   = open_price
         self._close_price                  = close_price
         self._high_price                   = high_price
@@ -54,6 +56,10 @@ class Candle:
     @property
     def close_time(self) -> datetime:
         return self._close_time
+
+    @property
+    def is_closed(self) -> bool:
+        return self._is_closed
 
     @property
     def open_price(self) -> float:
