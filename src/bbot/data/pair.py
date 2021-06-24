@@ -2,7 +2,7 @@ from ..options import Interval, Options
 from .window import Window
 from .candle import Candle
 
-class Pair:
+class _Pair:
     """Holds all windows and additional data related to a single pair,
     like BTCUSDT.
     """
@@ -15,9 +15,12 @@ class Pair:
             self.windows[symbol] = Window(iv, ws)
 
 
-    def _calc_window_rolls():
-        pass
+    def calc_window_rolls():
 
-    def _insert_and_update():
-        pass
+        pass #TODO
+
+
+    def insert_and_update():
+
+        pass #TODO
 

@@ -1,8 +1,4 @@
-'''
-
-A user event received through user websocket.
-
-'''
-
 class UserEvent:
-    pass
+    """A user event received through user websocket."""
+
+    pass #TODO

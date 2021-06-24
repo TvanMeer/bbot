@@ -104,7 +104,7 @@ class Candle:
 
     @missing.setter
     def missing(self, missing_flag: bool) -> None:
-        self._missing = True
+        self._missing = missing_flag
 
 
 

@@ -20,6 +20,7 @@ class Interval(Enum):
     d1:  86400000
     d3:  259200000
     w1:  604800000
+
 class Mode(Enum):
     """name = mode in uppercase, value = index+1."""
 
@@ -29,6 +30,7 @@ class Mode(Enum):
     PAPER:   auto()
     TESTNET: auto()
     TRADE:   auto()
+    
 @typechecked
 class Options:
     """Bot object requires an Options object at initialization.

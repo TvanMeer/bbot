@@ -12,7 +12,7 @@ class Window:
 
     def _add_historical_candle(self, candle: Candle) -> None:
         """Verifies and adds a single historical candle passed by
-        client._parse_historical_candle().
+        Client.parse_historical_candle().
         """
 
         pass #TODO
