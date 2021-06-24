@@ -1,43 +1,44 @@
 from typing import Optional
 from datetime import datetime
 
+
 class Candle:
     """A single candle."""
 
-    def __init__(self, 
-                 event_time:                   Optional(datetime),
-                 symbol:                       str,
-                 open_time:                    datetime, 
-                 close_time:                   datetime,
-                 is_closed:                    bool,
-                 open_price:                   float, 
-                 close_price:                  float,
-                 high_price:                   float, 
-                 low_price:                    float,
-                 base_asset_volume:            float,
-                 n_trades:                     int,
-                 quote_asset_volume:           float,
-                 taker_buy_base_asset_volume:  float,
-                 taker_buy_quote_asset_volume: float
-                 ) -> None:
+    def __init__(
+        self,
+        event_time: Optional[datetime],
+        symbol: str,
+        open_time: datetime,
+        close_time: datetime,
+        is_closed: bool,
+        open_price: float,
+        close_price: float,
+        high_price: float,
+        low_price: float,
+        base_asset_volume: float,
+        n_trades: int,
+        quote_asset_volume: float,
+        taker_buy_base_asset_volume: float,
+        taker_buy_quote_asset_volume: float,
+    ) -> None:
 
-        self._event_time                   = event_time
-        self._symbol                       = symbol
-        self._open_time                    = open_time
-        self._close_time                   = close_time
-        self._is_closed                    = is_closed
-        self._open_price                   = open_price
-        self._close_price                  = close_price
-        self._high_price                   = high_price
-        self._low_price                    = low_price
-        self._base_asset_volume            = base_asset_volume
-        self._n_trades                     = n_trades
-        self._quote_asset_volume           = quote_asset_volume
-        self._taker_buy_base_asset_volume  = taker_buy_base_asset_volume
+        self._event_time = event_time
+        self._symbol = symbol
+        self._open_time = open_time
+        self._close_time = close_time
+        self._is_closed = is_closed
+        self._open_price = open_price
+        self._close_price = close_price
+        self._high_price = high_price
+        self._low_price = low_price
+        self._base_asset_volume = base_asset_volume
+        self._n_trades = n_trades
+        self._quote_asset_volume = quote_asset_volume
+        self._taker_buy_base_asset_volume = taker_buy_base_asset_volume
         self._taker_buy_quote_asset_volume = taker_buy_quote_asset_volume
 
-        self._missing                      = False
-
+        self._missing = False
 
     # Attribute names
 
@@ -96,7 +97,6 @@ class Candle:
     @property
     def taker_buy_quote_asset_volume(self) -> float:
         return self._taker_buy_quote_asset_volume
-        
 
     @property
     def missing(self) -> bool:
@@ -105,8 +105,6 @@ class Candle:
     @missing.setter
     def missing(self, missing_flag: bool) -> None:
         self._missing = missing_flag
-
-
 
     # Shorthand attribute names
 

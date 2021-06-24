@@ -12,8 +12,9 @@ def bot():
 
 
 def test_stop(bot):
-    #assert bot.stop() == ...
+    # assert bot.stop() == ...
     pass
+
 
 def test__create_client(bot):
     assert bot._bc is _BinanceClient

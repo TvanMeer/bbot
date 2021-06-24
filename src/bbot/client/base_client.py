@@ -3,16 +3,16 @@ from abc import abstractmethod, ABCMeta
 from typing import Any, FrozenSet
 
 
-from ..data.candle     import Candle
-from ..data.database   import _Database
+from ..data.candle import Candle
+from ..data.database import _Database
 from ..data.user_event import UserEvent
-from ..options         import Interval, Options
+from ..options import Interval, Options
+
 
 class _BaseClient(metaclass=ABCMeta):
     """Abstract interface for all exchange clients.
     Only for Binance a client is implemented.
     """
-
 
     def __init__(self, options: Options):
         """All bootstrapping logic of client is defined here.
@@ -27,11 +27,14 @@ class _BaseClient(metaclass=ABCMeta):
         # 1
         self.options = options
         self.db = self.create_database(self.options)
+
         # 2
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
+
         # 3
         self.client = self.create_async_client(self.options)
+
         # 4
         raw = self.download_all_symbols(self.client)
 
@@ -40,10 +43,9 @@ class _BaseClient(metaclass=ABCMeta):
 
         filtered = self.db.filter_symbols(parsed)
         self.db.selected_symbols = filtered
-        # 5
-        self.start_coroutines(filtered, self.client)
-        
 
+        # 5
+        self.start_coroutines(filtered, self.client, self.db)
 
     def create_database(self, options: Options) -> _Database:
         """Returns a _Database object that contains all data.
@@ -53,111 +55,104 @@ class _BaseClient(metaclass=ABCMeta):
 
         return _Database(options)
 
-
     async def start_coroutines(self, symbols: FrozenSet[str], client: Any, db: _Database) -> None:
         """Starts concurrent downloads and streams."""
 
         hist = asyncio.create_task(self.download_history(symbols, client, db))
-        cs   = asyncio.create_task(self.start_candle_sockets(symbols, client))
-        us   = asyncio.create_task(self.start_user_socket(client))
+        cs = asyncio.create_task(self.start_candle_sockets(symbols, client))
+        us = asyncio.create_task(self.start_user_socket(client))
         try:
             await cs, hist, us
         except KeyboardInterrupt:
-            print('Bbot interrupted...')
+            print("Bbot interrupted...")
         finally:
             self.loop.close()
-            print('Bbot shutdown...')
+            print("Bbot shutdown...")
 
-    
     @abstractmethod
-    def shutdown():
+    def shutdown(self):
         """Shutdown client."""
-        
+
         raise NotImplementedError
 
-
     @abstractmethod
-    async def create_async_client(options: Options) -> Any:
+    async def create_async_client(self, options: Options) -> Any:
         """Returns *some* client object. In case of Binance this
         is the python-binance.AsyncClient object. This object is
         passed as an argument in all functions that do API calls.
         """
 
         raise NotImplementedError
-    
 
     @abstractmethod
     async def download_all_symbols(self, client: Any) -> Any:
-        """Downloads *some data* that contains all symbols of the 
-        pairs being traded at the exchange. An example of a symbol 
+        """Downloads *some data* that contains all symbols of the
+        pairs being traded at the exchange. An example of a symbol
         is 'BTCUSDT'. Return this data as provided by the API.
         """
 
         raise NotImplementedError
 
-
     @abstractmethod
-    def parse_all_symbols(raw: Any) -> FrozenSet[str]:
+    def parse_all_symbols(self, raw: Any) -> FrozenSet[str]:
         """Filters and returns all symbols of pairs being traded
         at the exchange from raw data and returns them as a set.
         """
 
         raise NotImplementedError
 
-
     @abstractmethod
-    async def download_history(symbols: FrozenSet[str], client: Any, db: _Database) -> None:
-        """Downloads all windows of historical candlestick data, 
+    async def download_history(self, symbols: FrozenSet[str], client: Any, db: _Database) -> None:
+        """Downloads all windows of historical candlestick data,
         as raw data in the format provided by the API. Then iterates through
         each window and passes candles one by one to self.parse_historical_candle().
         """
-    
+
         raise NotImplementedError
 
-
     @abstractmethod
-    def parse_historical_candle(raw: Any, symbol: str, interval: Interval, db: _Database) -> None:
-        """Takes single candle from raw historical candlestick data coming 
+    def parse_historical_candle(
+        self, raw: Any, symbol: str, interval: Interval, db: _Database
+    ) -> None:
+        """Takes single candle from raw historical candlestick data coming
         from self.download_history() and transforms it to a Candle object.
-        Then passes this candle object to the corresponding Window instance in 
+        Then passes this candle object to the corresponding Window instance in
         db.<Pair>.<Window>._add_historical_candle().
         """
 
         raise NotImplementedError
 
-
     @abstractmethod
-    async def start_candle_sockets(symbols: FrozenSet[str], client: Any, db: _Database) -> None:
+    async def start_candle_sockets(
+        self, symbols: FrozenSet[str], client: Any, db: _Database
+    ) -> None:
         """Starts one or multiple websockets to stream candlestick data.
-        Each socket streams data related to one pair. Only time interval 
+        Each socket streams data related to one pair. Only time interval
         1 minute is streamed. Other intervals are calculated on the fly later.
         Passes parsed candle to db.<_Pair>.calc_window_rolls().
         """
-              
+
         raise NotImplementedError
 
-
     @abstractmethod
-    def parse_candle(raw: Any) -> Candle:
+    def parse_candle(self, raw: Any) -> Candle:
         """Takes raw data of a single candle and returns a Candle object."""
-        
+
         raise NotImplementedError
 
-
     @abstractmethod
-    async def start_user_socket(client: Any) -> None:
+    async def start_user_socket(self, client: Any) -> None:
         """Starts a websocket that listens to user events."""
-        
+
         raise NotImplementedError
 
-
     @abstractmethod
-    def parse_user_event(event: Any) -> UserEvent:
+    def parse_user_event(self, event: Any) -> UserEvent:
         """Parses a message from a user socket. This message is one of
         the following events:
         1) Account update
         2) Order update
         3) Trade update
         """
-        
+
         raise NotImplementedError
