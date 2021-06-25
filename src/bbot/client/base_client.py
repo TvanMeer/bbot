@@ -59,7 +59,7 @@ class _BaseClient(metaclass=ABCMeta):
         """Starts concurrent downloads and streams."""
 
         hist = asyncio.create_task(self.download_history(symbols, client, db))
-        cs = asyncio.create_task(self.start_candle_sockets(symbols, client))
+        cs = asyncio.create_task(self.start_candle_sockets(symbols, client, db))
         us = asyncio.create_task(self.start_user_socket(client))
         try:
             await cs, hist, us

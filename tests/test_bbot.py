@@ -1,3 +1,4 @@
+"""
 import pytest
 
 from bbot.bbot import Bot
@@ -19,3 +20,4 @@ def test_stop(bot):
 def test__create_client(bot):
     assert bot._bc is _BinanceClient
     assert bot._bc == _BinanceClient(Options())
+"""
