@@ -1,11 +1,10 @@
-from ..options import Interval
 from .candle import Candle
 
 
 class Window:
     """This class holds only candles of a specific time interval."""
 
-    def __init__(self, interval: Interval, windowsize: int) -> None:
+    def __init__(self, interval: str, windowsize: int) -> None:
 
         self.interval = interval
         self.windowsize = windowsize

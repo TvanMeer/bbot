@@ -1,4 +1,4 @@
-from ..options import Interval, Options
+from ..options import Options
 from .window import Window
 from .candle import Candle
 

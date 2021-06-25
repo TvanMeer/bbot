@@ -6,7 +6,7 @@ from typing import Any, FrozenSet
 from ..data.candle import Candle
 from ..data.database import _Database
 from ..data.user_event import UserEvent
-from ..options import Interval, Options
+from ..options import Options
 
 
 class _BaseClient(metaclass=ABCMeta):
@@ -45,7 +45,7 @@ class _BaseClient(metaclass=ABCMeta):
         self.db.selected_symbols = filtered
 
         # 5
-        self.start_coroutines(filtered, self.client, self.db)
+        # Start downloads and streams by calling client.start()
 
     def create_database(self, options: Options) -> _Database:
         """Returns a _Database object that contains all data.
@@ -55,7 +55,15 @@ class _BaseClient(metaclass=ABCMeta):
 
         return _Database(options)
 
-    async def start_coroutines(self, symbols: FrozenSet[str], client: Any, db: _Database) -> None:
+    def start(self):
+        """Calls start_coroutines()."""
+        self.loop.run_until_complete(
+            self.start_coroutines(self.loop, self.db.selected_symbols, self.client, self.db)
+        )
+
+    async def start_coroutines(
+        self, loop: asyncio.BaseEventLoop, symbols: FrozenSet[str], client: Any, db: _Database
+    ) -> None:
         """Starts concurrent downloads and streams."""
 
         hist = asyncio.create_task(self.download_history(symbols, client, db))
@@ -70,10 +78,8 @@ class _BaseClient(metaclass=ABCMeta):
             print("Bbot shutdown...")
 
     @abstractmethod
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Shutdown client."""
-
-        raise NotImplementedError
 
     @abstractmethod
     async def create_async_client(self, options: Options) -> Any:
@@ -82,8 +88,6 @@ class _BaseClient(metaclass=ABCMeta):
         passed as an argument in all functions that do API calls.
         """
 
-        raise NotImplementedError
-
     @abstractmethod
     async def download_all_symbols(self, client: Any) -> Any:
         """Downloads *some data* that contains all symbols of the
@@ -91,15 +95,11 @@ class _BaseClient(metaclass=ABCMeta):
         is 'BTCUSDT'. Return this data as provided by the API.
         """
 
-        raise NotImplementedError
-
     @abstractmethod
     def parse_all_symbols(self, raw: Any) -> FrozenSet[str]:
         """Filters and returns all symbols of pairs being traded
         at the exchange from raw data and returns them as a set.
         """
-
-        raise NotImplementedError
 
     @abstractmethod
     async def download_history(self, symbols: FrozenSet[str], client: Any, db: _Database) -> None:
@@ -108,19 +108,13 @@ class _BaseClient(metaclass=ABCMeta):
         each window and passes candles one by one to self.parse_historical_candle().
         """
 
-        raise NotImplementedError
-
     @abstractmethod
-    def parse_historical_candle(
-        self, raw: Any, symbol: str, interval: Interval, db: _Database
-    ) -> None:
+    def parse_historical_candle(self, raw: Any, symbol: str, interval: str, db: _Database) -> None:
         """Takes single candle from raw historical candlestick data coming
         from self.download_history() and transforms it to a Candle object.
         Then passes this candle object to the corresponding Window instance in
         db.<Pair>.<Window>._add_historical_candle().
         """
-
-        raise NotImplementedError
 
     @abstractmethod
     async def start_candle_sockets(
@@ -132,19 +126,13 @@ class _BaseClient(metaclass=ABCMeta):
         Passes parsed candle to db.<_Pair>.calc_window_rolls().
         """
 
-        raise NotImplementedError
-
     @abstractmethod
     def parse_candle(self, raw: Any) -> Candle:
         """Takes raw data of a single candle and returns a Candle object."""
 
-        raise NotImplementedError
-
     @abstractmethod
     async def start_user_socket(self, client: Any) -> None:
         """Starts a websocket that listens to user events."""
-
-        raise NotImplementedError
 
     @abstractmethod
     def parse_user_event(self, event: Any) -> UserEvent:
@@ -154,5 +142,3 @@ class _BaseClient(metaclass=ABCMeta):
         2) Order update
         3) Trade update
         """
-
-        raise NotImplementedError

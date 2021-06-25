@@ -6,7 +6,7 @@ from .pair import _Pair
 from .user_event import UserEvent
 
 
-@typechecked
+#@typechecked
 class _Database:
     """Holds all pairs with k = symbol and v = _Pair object.
     Also holds user_event objects in an array.
@@ -40,7 +40,7 @@ class _Database:
 
         self.all_symbols = frozenset(all_symbols)
         self.selected_symbols = frozenset(selected_symbols)
-        for s in selected_symbols:
+        for s in self.selected_symbols:
             self.pairs[s] = _Pair(s, self.options)
 
     def process_user_event(self, user_event: UserEvent) -> None:

@@ -4,7 +4,7 @@ import asyncio
 import datetime
 
 from .base_client import _BaseClient
-from ..options import Interval, Options
+from ..options import Options
 from ..data.database import _Database
 from ..data.candle import Candle
 from ..data.user_event import UserEvent
@@ -57,19 +57,19 @@ class _BinanceClient(_BaseClient):
 
         for s in symbols:
             for w in self.options.windows.keys():
-                if w == Interval.s2:
+                if w == "2s":
                     continue
                 timestr = self.to_timestring(w.name, w.value)
                 candles = await client.get_historical_klines(s, w.name, timestr)
                 for c in candles:
-                    self.parse_historical_candle(c, s, Interval[w], db)
+                    self.parse_historical_candle(c, s, w, db)
                 asyncio.sleep(1)
 
-    def to_timestring(self, interval: Interval, windowsize: int) -> str:
+    def to_timestring(self, interval: str, windowsize: int) -> str:
         # Helperfunction to download history with binance-python.
 
-        amount = int(interval.name[1:]) * windowsize
-        time_frame = interval.name[0]
+        amount = int(interval[:-1]) * windowsize
+        time_frame = interval[-1]
         if time_frame == "m":
             return f"{amount} minutes ago UTC"
         elif time_frame == "h":
@@ -81,9 +81,7 @@ class _BinanceClient(_BaseClient):
         else:
             raise Exception(f"Error: invalid interval:  {time_frame}")
 
-    def parse_historical_candle(
-        self, raw: List, symbol: str, interval: Interval, db: _Database
-    ) -> None:
+    def parse_historical_candle(self, raw: List, symbol: str, interval: str, db: _Database) -> None:
         """Takes single candle from raw historical candlestick data coming
         from self.download_history() and transforms it to a Candle object.
         Then passes this candle object to the corresponding Window instance in
@@ -107,7 +105,7 @@ class _BinanceClient(_BaseClient):
             taker_buy_quote_asset_volume=float(raw[10]),
         )
 
-        db.pairs[symbol].windows[symbol]._add_historical_candle(hc)
+        db.pairs[symbol].windows[interval]._add_historical_candle(hc)
 
     def ms_to_datetime(self, ms: int) -> datetime:
         # Helperfunction that creates datetime object.
