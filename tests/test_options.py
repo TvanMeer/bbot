@@ -50,9 +50,11 @@ def test_verify_clean_windows(options):
     with pytest.raises(Exception):
         options._verify_clean_windows({"2m": 500, "15m": 200})
     with pytest.raises(Exception):
-        options._verify_clean_windows({"1m": 501, "15m": 200})
+        options._verify_clean_windows({"1m": 502, "15m": 200})
     with pytest.raises(Exception):
         options._verify_clean_windows(["2m", 500, "15m", 200])
+    with pytest.raises(Exception):
+        options._verify_clean_windows({"2m", 500, "15m", 3})
 
 
 def test_getters(options):

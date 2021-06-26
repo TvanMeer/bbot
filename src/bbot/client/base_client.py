@@ -46,6 +46,7 @@ class _BaseClient(metaclass=ABCMeta):
 
         # 5
         # Start downloads and streams by calling client.start()
+        # from outside of this class.
 
     def create_database(self, options: Options) -> _Database:
         """Returns a _Database object that contains all data.
@@ -55,7 +56,7 @@ class _BaseClient(metaclass=ABCMeta):
 
         return _Database(options)
 
-    def start(self):
+    def start_loops(self):
         """Calls start_coroutines()."""
         self.loop.run_until_complete(
             self.start_coroutines(self.loop, self.db.selected_symbols, self.client, self.db)

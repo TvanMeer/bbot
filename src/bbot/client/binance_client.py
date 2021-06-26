@@ -63,7 +63,8 @@ class _BinanceClient(_BaseClient):
                 candles = await client.get_historical_klines(s, w.name, timestr)
                 for c in candles:
                     self.parse_historical_candle(c, s, w, db)
-                asyncio.sleep(1)
+                    await asyncio.sleep(0.0001)
+                await asyncio.sleep(1)
 
     def to_timestring(self, interval: str, windowsize: int) -> str:
         # Helperfunction to download history with binance-python.

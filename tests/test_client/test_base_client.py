@@ -3,7 +3,6 @@ import time
 from datetime import datetime
 from typing import Any, FrozenSet
 import pytest
-import pytest_asyncio
 
 from bbot.client.base_client import _BaseClient
 from bbot.data.candle import Candle
@@ -19,7 +18,7 @@ def options():
 
 class TestClient(_BaseClient):
 
-    # Overwriting all abstract methods of _BaseClient:
+    # A mock client implementation:
     def __init__(self, options: Options):
         super().__init__(options)
 

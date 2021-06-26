@@ -83,7 +83,8 @@ class Options:
 
         if sum([iv in self._possible_intervals for iv in windows.keys()]) == len(windows):
             if sum([w <= 500 for w in windows.values()]) == len(windows):
-                return windows
+                if [iv % 2 == 0 for iv in windows.keys()]:
+                    return windows
 
         raise Exception("Invalid input for option `windows` in bbot.Options")
 
