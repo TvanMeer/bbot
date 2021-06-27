@@ -1,13 +1,12 @@
 from typing import FrozenSet
-from typeguard import typechecked
 
 from ..options import Options
 from .pair import _Pair
 from .user_event import UserEvent
 
 
-#@typechecked
-class _Database:
+# @typechecked
+class Database:
     """Holds all pairs with k = symbol and v = _Pair object.
     Also holds user_event objects in an array.
     """
@@ -19,7 +18,7 @@ class _Database:
         self.pairs = {}
         self.user_events = []
 
-    def filter_symbols(self, symbols: FrozenSet) -> FrozenSet:
+    def _filter_symbols(self, symbols: FrozenSet) -> FrozenSet:
         """Filters all symbols and returns symbols that have both
         base and quote assets listed in Options.base_assets and
         Options.quote_assets.
@@ -36,7 +35,9 @@ class _Database:
         self.create_pairs(symbols, filtered)
         return frozenset(filtered)
 
-    def create_pairs(self, all_symbols: FrozenSet, selected_symbols: FrozenSet) -> None:
+    def create_pairs(
+        self, all_symbols: FrozenSet, selected_symbols: FrozenSet
+    ) -> None:
 
         self.all_symbols = frozenset(all_symbols)
         self.selected_symbols = frozenset(selected_symbols)

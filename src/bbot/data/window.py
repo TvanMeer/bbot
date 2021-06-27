@@ -16,3 +16,9 @@ class Window:
         """
 
         pass  # TODO
+
+    def _add_new_candle(self, candle: Candle) -> None:
+        pass  # TODO
+
+    def _update_candle(self, candle: Candle) -> None:
+        pass  # TODO

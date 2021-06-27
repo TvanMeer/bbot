@@ -1,3 +1,5 @@
+from typing import FrozenSet
+
 from ..options import Options
 from .window import Window
 from .candle import Candle
@@ -15,10 +17,6 @@ class _Pair:
         for iv, ws in options.windows.items():
             self.windows[symbol] = Window(iv, ws)
 
-    def calc_window_rolls(self):
-
-        pass  # TODO
-
-    def insert_and_update(self):
+    def calc_window_rolls(self, candle: Candle) -> FrozenSet:
 
         pass  # TODO
