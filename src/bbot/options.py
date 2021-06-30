@@ -50,15 +50,21 @@ class Options:
         if mode.upper() in self._possible_modes:
             return mode.upper()
         else:
-            raise Exception(f"Invalid input for option `mode` in bbot.Options: {mode}")
+            raise Exception(
+                f"Invalid input for option `mode` in bbot.Options: {mode}"
+            )
 
-    def _verify_clean_base_assets(self, base_assets: Union[str, List[str]]) -> FrozenSet[str]:
+    def _verify_clean_base_assets(
+        self, base_assets: Union[str, List[str]]
+    ) -> FrozenSet[str]:
         """Verifies raw user input for option `base_assets`"""
 
         e = "Invalid input for option `base_assets` or `quote_assets` in bbot.Options"
 
         if type(base_assets) is str:
-            if (base_assets.isalpha() and len(base_assets) < 10) or base_assets == "*":
+            if (
+                base_assets.isalpha() and len(base_assets) < 10
+            ) or base_assets == "*":
                 return frozenset((base_assets.upper(),))
             else:
                 raise Exception(e)
@@ -73,7 +79,9 @@ class Options:
             else:
                 raise Exception(e)
 
-    def _verify_clean_quote_assets(self, quote_assets: Union[str, List[str]]) -> FrozenSet[str]:
+    def _verify_clean_quote_assets(
+        self, quote_assets: Union[str, List[str]]
+    ) -> FrozenSet[str]:
         """Verifies raw user input for option `quote_assets`"""
 
         return self._verify_clean_base_assets(quote_assets)
@@ -81,9 +89,11 @@ class Options:
     def _verify_clean_windows(self, windows: Dict[str, int]) -> Dict[str, int]:
         """Verifies raw user input for option `windows`"""
 
-        if sum([iv in self._possible_intervals for iv in windows.keys()]) == len(windows):
+        if sum(
+            [iv in self._possible_intervals for iv in windows.keys()]
+        ) == len(windows):
             if sum([w <= 500 for w in windows.values()]) == len(windows):
-                if [iv % 2 == 0 for iv in windows.keys()]:
+                if sum([w % 2 == 0 for w in windows.values()]) == len(windows):
                     return windows
 
         raise Exception("Invalid input for option `windows` in bbot.Options")

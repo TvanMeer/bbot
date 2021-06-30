@@ -37,8 +37,12 @@ def test_verify_clean_base_assets(options):
     with pytest.raises(Exception):
         options._verify_clean_base_assets("BT123C")
 
-    assert options._verify_clean_base_assets(["BTC", "ADA"]) == frozenset(["BTC", "ADA"])
-    assert options._verify_clean_base_assets(["Btc", "ada"]) == frozenset(["BTC", "ADA"])
+    assert options._verify_clean_base_assets(["BTC", "ADA"]) == frozenset(
+        ["BTC", "ADA"]
+    )
+    assert options._verify_clean_base_assets(["Btc", "ada"]) == frozenset(
+        ["BTC", "ADA"]
+    )
     with pytest.raises(Exception):
         options._verify_clean_base_assets(["BT123C", "ADA"])
     with pytest.raises(Exception):
@@ -46,7 +50,10 @@ def test_verify_clean_base_assets(options):
 
 
 def test_verify_clean_windows(options):
-    assert options._verify_clean_windows({"1m": 500, "15m": 200}) == {"1m": 500, "15m": 200}
+    assert options._verify_clean_windows({"1m": 500, "15m": 200}) == {
+        "1m": 500,
+        "15m": 200,
+    }
     with pytest.raises(Exception):
         options._verify_clean_windows({"2m": 500, "15m": 200})
     with pytest.raises(Exception):
