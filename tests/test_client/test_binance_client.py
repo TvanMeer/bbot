@@ -10,9 +10,11 @@ from bbot.options import Options
 @pytest.fixture
 def all_tickers():
     return [
-        {"symbol": "UTKBUSD", "price": "0.22540000"},
-        {"symbol": "IOTXBUSD", "price": "0.02093000"},
-        {"symbol": "PHAUSDT", "price": "0.70170000"},
+        {"symbol": "BTCUSDT", "price": "0.22540000"},
+        {"symbol": "ADAUSDT", "price": "0.02093000"},
+        {"symbol": "BTCUSDC", "price": "0.70170000"},
+        {"symbol": "XRPBTC", "price": "12345.74780000"},
+        {"symbol": "BTCxxxxxUSDT", "price": "34437.11000000"},
     ]
 
 
@@ -351,6 +353,13 @@ def options():
 async def async_client(options):
     return await AsyncClient.create(
         api_key=options.api_key, api_secret=options.api_secret
+    )
+
+
+@pytest.fixture
+def all_symbols():
+    return frozenset(
+        ["BTCUSDT", "ADAUSDT", "BTCUSDC", "XRPBTC", "BTCxxxxxUSDT"]
     )
 
 
