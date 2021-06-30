@@ -345,14 +345,14 @@ def user_event_order_update_list_status():
 
 @pytest.fixture
 def options():
-    return Options
+    return Options()
 
 
 @pytest.fixture
 @pytest.mark.asyncio
 async def async_client(options):
     return await AsyncClient.create(
-        api_key=options.api_key, api_secret=options.api_secret
+        api_key=options._api_key, api_secret=options._api_secret
     )
 
 

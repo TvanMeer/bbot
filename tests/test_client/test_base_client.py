@@ -39,11 +39,10 @@ def parsed_new_candle():
     return {}  # TODO
 
 
-
-
-
 @pytest.fixture
-def test_client_orig(options, async_client, all_tickers, all_symbols, history_1m):
+def test_client(
+    options, async_client, all_tickers, all_symbols, history_1m
+):
     class TestClient(_BaseClient):
         """A mock client implementation."""
 
@@ -61,7 +60,9 @@ def test_client_orig(options, async_client, all_tickers, all_symbols, history_1m
         def parse_all_symbols(self, payload):
             return all_symbols
 
-        async def download_history(self, selected_symbols, window_options, client):
+        async def download_history(
+            self, selected_symbols, window_options, client
+        ):
             await asyncio.sleep(0.5)
             return history_1m
 
@@ -80,30 +81,29 @@ def test_client_orig(options, async_client, all_tickers, all_symbols, history_1m
         def parse_user_event(self, event):
             pass  # TODO
 
-
     return TestClient(options)
 
 @pytest.fixture
-def event_loop():
-   loop = asyncio.new_event_loop()
-   asyncio.set_event_loop(loop)
-   yield loop
-   loop.close()
-
-@pytest.fixture
-def test_client(test_client_orig, event_loop):
-   test_client_orig.loop = event_loop
-   return test_client_orig
+def test_client_started(test_client):
+    test_client.start()
+    yield test_client
+    test_client.loop.close()
 
 
 # Unit tests ----------------------------------------------------------
 
 
-def test_init(options):
-    pass
+def test_init(test_client):
+    assert isinstance(test_client.options, Options)
+    assert isinstance(test_client.shutdown_flag, bool)
+    assert isinstance(test_client.finished_history_download, set)
+    assert isinstance(test_client.candles, dict)
+    assert isinstance(test_client.all_symbols, set)
+    assert isinstance(test_client.selected_symbols, set)
+    assert isinstance(test_client.user_events, list)
 
 
-def test_start():
+def test_start(test_client):
     pass
 
 

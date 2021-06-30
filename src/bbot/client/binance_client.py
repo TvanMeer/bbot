@@ -22,7 +22,7 @@ class _BinanceClient(_BaseClient):
         """Returns a python-binance.AsyncClient object."""
 
         return await AsyncClient.create(
-            api_key=options.api_key, api_secret=options.api_secret
+            api_key=options._api_key, api_secret=options._api_secret
         )
 
     async def download_all_symbols(self, client: AsyncClient) -> List[Dict]:
