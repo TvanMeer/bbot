@@ -5,8 +5,6 @@ from typing import Any, FrozenSet
 import pytest
 
 from bbot.client.base_client import _BaseClient
-from bbot.data.candle import Candle
-from bbot.data.database import _Database
 from bbot.data.user_event import UserEvent
 from bbot.options import Options
 
@@ -34,16 +32,20 @@ class TestClient(_BaseClient):
     def parse_all_symbols(self, raw: Any) -> FrozenSet[str]:
         return frozenset(["BTCUSDT", "ADAUSDT"])
 
-    async def download_history(self, symbols: FrozenSet[str], client: Any, db: _Database) -> None:
-        asyncio.sleep(1)
+    async def download_history(
+        self, symbols: FrozenSet[str], client: Any, db: _Database
+    ) -> None:
+        await asyncio.sleep(1)
 
-    def parse_historical_candle(self, raw: Any, symbol: str, interval: str, db: _Database) -> None:
+    def parse_historical_candle(
+        self, raw: Any, symbol: str, interval: str, db: _Database
+    ) -> None:
         pass
 
     async def start_candle_sockets(
         self, symbols: FrozenSet[str], client: Any, db: _Database
     ) -> None:
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
 
     def parse_candle(self, raw: Any) -> Candle:
         return Candle(
@@ -64,10 +66,13 @@ class TestClient(_BaseClient):
         )
 
     async def start_user_socket(self, client: Any) -> None:
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
 
     def parse_user_event(self, event: Any) -> UserEvent:
         return UserEvent()
+
+    async def start_consumer(self) -> None:
+        await asyncio.sleep(1)
 
 
 @pytest.fixture
@@ -100,7 +105,10 @@ async def test_start_coroutines(event_loop, base_client):
 
     before = time.time()
     await base_client.start_coroutines(
-        event_loop, base_client.db.selected_symbols, base_client.client, base_client.db
+        event_loop,
+        base_client.db.selected_symbols,
+        base_client.client,
+        base_client.db,
     )
     after = time.time()
-    # TODO
+    assert after - before > 1 and after - before < 2
