@@ -1,7 +1,4 @@
 import asyncio
-import time
-from datetime import datetime
-from typing import Any, FrozenSet
 from binance.client import AsyncClient
 import pytest
 
@@ -9,13 +6,20 @@ from bbot.client.base_client import _BaseClient
 from bbot.data.user_event import UserEvent
 from bbot.options import Options
 
-from .test_binance_client import all_tickers, history_1m, options, async_client
+from .test_binance_client import (
+    all_tickers,
+    candle,
+    history_1m,
+    options,
+    async_client,
+    selected_symbols,
+)
 
 
 @pytest.fixture
 def all_symbols():
     return frozenset(
-        ["BTCUSDT", "ADAUSDT", "BTCUSDC", "XRPBTC", "BTCxxxxxUSDT"]
+        {"BTCUSDT", "ADAUSDT", "BTCUSDC", "XRPBTC", "BTCxxxxxUSDT"}
     )
 
 
@@ -39,38 +43,36 @@ def parsed_new_candle():
     return {}  # TODO
 
 
-@pytest.fixture
-def test_client(
-    options, async_client, all_tickers, all_symbols, history_1m
-):
+@pytest.fixture(scope="module")
+def testclient(options, async_client, all_tickers, all_symbols, history_1m, historical_candle, candle):
     class TestClient(_BaseClient):
         """A mock client implementation."""
 
         def __init__(self, options):
             super().__init__(options)
 
-        async def create_async_client(self, options):
+        async def create_async_client(self, async_client):
             await asyncio.sleep(0.0001)
             return async_client
 
-        async def download_all_symbols(self, client):
+        async def download_all_symbols(self, all_tickers):
             await asyncio.sleep(0.0001)
             return all_tickers
 
-        def parse_all_symbols(self, payload):
+        def parse_all_symbols(self, all_symbols):
             return all_symbols
 
-        async def download_history(
-            self, selected_symbols, window_options, client
-        ):
+        async def download_history(self, history_1m):
             await asyncio.sleep(0.5)
             return history_1m
 
-        def parse_historical_candle(self, payload):
-            pass  # TODO
+        def parse_historical_candle(self, parsed_historical_candle):
+            return parsed_historical_candle
 
-        async def start_candle_sockets(self, symbols, client):
-            await asyncio.sleep(1)
+        async def start_candle_sockets(self, candle):
+            while True:
+                self.q.put(candle)
+                await asyncio.sleep(2)
 
         def parse_new_candle(self, payload):
             pass  # TODO
@@ -81,30 +83,34 @@ def test_client(
         def parse_user_event(self, event):
             pass  # TODO
 
-    return TestClient(options)
+    tc = TestClient(options)
+    yield tc
+    tc.stop()
 
-@pytest.fixture
-def test_client_started(test_client):
-    test_client.start()
-    yield test_client
-    test_client.loop.close()
 
 
 # Unit tests ----------------------------------------------------------
 
 
-def test_init(test_client):
-    assert isinstance(test_client.options, Options)
-    assert isinstance(test_client.shutdown_flag, bool)
-    assert isinstance(test_client.finished_history_download, set)
-    assert isinstance(test_client.candles, dict)
-    assert isinstance(test_client.all_symbols, set)
-    assert isinstance(test_client.selected_symbols, set)
-    assert isinstance(test_client.user_events, list)
+def test_init(testclient):
+    assert isinstance(testclient.options, Options)
+    assert isinstance(testclient.shutdown_flag, bool)
+    assert isinstance(testclient.finished_history_download, set)
+    assert isinstance(testclient.candles, dict)
+    assert isinstance(testclient.all_symbols, set)
+    assert isinstance(testclient.selected_symbols, set)
+    assert isinstance(testclient.user_events, list)
 
 
-def test_start(test_client):
-    pass
+def test_start(testclient, all_symbols, selected_symbols):
+    testclient.start()
+    # assert isinstance(test_client.loop, asyncio.BaseEventLoop)
+    # assert isinstance(test_client.q, asyncio.Queue)
+    # assert isinstance(test_client, AsyncClient)
+    # assert test_client.all_symbols == all_symbols
+    # assert test_client.selected_symbols == selected_symbols
+    # assert test_client.candles["BTCUSDT"]["1m"] == []
+    # assert test_client.candles["BTCUSDT"]["15m"] == []
 
 
 def test_stop():

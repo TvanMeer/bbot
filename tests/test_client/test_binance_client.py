@@ -376,6 +376,14 @@ def selected_symbols():
 def window_options():
     return Options().windows
 
+@pytest.fixture
+def parsed_historical_candle():
+    pass #TODO
+
+@pytest.fixture
+def parsed_new_candle():
+    pass #TODO
+
 
 # Unit tests ------------------------------------------------------------
 def test_init(options):

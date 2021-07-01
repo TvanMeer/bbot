@@ -58,6 +58,21 @@ class _BinanceClient(_BaseClient):
         Returns a dict that represents a single candle.
         """
 
+        return {
+                "open_time": float(payload[0]),
+                "open": float(payload[1]),
+                "high": float(payload[2]),
+                "low": float(payload[3]),
+                "close": float(payload[4]),
+                "volume": float(payload[5]),
+                "close_time": float(payload[6]),
+                "qa_volume": float(payload[7]),
+                "n_trades": float(payload[8]),
+                "tbba_volume": float(payload[9]),
+                "tbqa_volume": float(payload[10]),
+                "missing": False,
+        }  
+
     async def start_candle_sockets(
         self, selected_symbols: FrozenSet[str], client: AsyncClient
     ) -> None:
