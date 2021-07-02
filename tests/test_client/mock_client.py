@@ -113,7 +113,7 @@ class MockClient(_BaseClient):
                 "qa_volume": float("626663.26924604"),
                 "n_trades": float(560),
                 "tbba_volume": float("10.84483500"),
-                "tbqa_volume": "373333.75765970",
+                "tbqa_volume": float("373333.75765970"),
                 "missing": False,
             }
         else:
@@ -128,7 +128,7 @@ class MockClient(_BaseClient):
                 "qa_volume": float("54055.33589430"),
                 "n_trades": float(61),
                 "tbba_volume": float("1.32232600"),
-                "tbqa_volume": "45535.39363053",
+                "tbqa_volume": float("45535.39363053"),
                 "missing": False,
             }
 
@@ -141,7 +141,37 @@ class MockClient(_BaseClient):
         Passes each incoming message in the queue.
         """
 
-        # TODO
+        while True:
+            self.q.put(
+                {
+                    "stream": "btcusdt@kline_1m",
+                    "data": {
+                        "e": "kline",
+                        "E": 1624935608626,
+                        "s": "BTCUSDT",
+                        "k": {
+                            "t": 1624935600000,
+                            "T": 1624935659999,
+                            "s": "BTCUSDT",
+                            "i": "1m",
+                            "f": 937706327,
+                            "L": 937706450,
+                            "o": "34312.62000000",
+                            "c": "34315.07000000",
+                            "h": "34315.36000000",
+                            "l": "34307.15000000",
+                            "v": "4.66117500",
+                            "n": 124,
+                            "x": False,
+                            "q": "159923.57796175",
+                            "V": "1.72322000",
+                            "Q": "59122.29261096",
+                            "B": "0",
+                        },
+                    },
+                }
+            )
+            asyncio.sleep(2)
 
     def parse_new_candle(self, payload: Dict) -> Dict[str, float]:
         """Takes data of a single candle as provided by a websocket and returns a
