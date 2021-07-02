@@ -178,13 +178,27 @@ class MockClient(_BaseClient):
         dict representing a single candle.
         """
 
-        return  # TODO
+        d = payload["data"]["k"]
+        return {
+            "open_time": float(d["t"]),
+            "open": float(d["o"]),
+            "high": float(d["h"]),
+            "low": float(d["l"]),
+            "close": float(d["c"]),
+            "volume": float(d["v"]),
+            "close_time": float(d["T"]),
+            "qa_volume": float(d["q"]),
+            "n_trades": float(d["n"]),
+            "tbba_volume": float(d["V"]),
+            "tbqa_volume": float(d["Q"]),
+            "corrupt": False,
+        }
 
     async def start_user_socket(self, client: AsyncClient) -> None:
         """Starts a websocket that listens to user events.
         These user events are passed to the queue as raw data payload.
         """
-
+        pass
         # TODO
 
     def parse_user_event(self, event: Dict) -> UserEvent:
@@ -195,4 +209,5 @@ class MockClient(_BaseClient):
         3) Trade update
         """
 
-        return  # TODO
+        return UserEvent()
+        # TODO
