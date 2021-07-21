@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # drawio
-/docs/bbot_internals.drawio
+/docs/*.drawio
