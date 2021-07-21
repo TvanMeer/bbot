@@ -4,6 +4,11 @@ import pytest
 
 from bbot.options import Options
 
+#TODO: 
+# class BinanceClientTest(MockClient, BinanceClient)
+
+#--------!---------------------
+
 # Raw data as provided by python-binance -----------------------------------------------------
 
 

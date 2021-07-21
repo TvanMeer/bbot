@@ -15,6 +15,8 @@ from .test_binance_client import (
     selected_symbols,
 )
 
+# TODO: BaseClientTest(_BaseClient, FakeClient)
+
 
 @pytest.fixture
 def all_symbols():
@@ -44,7 +46,15 @@ def parsed_new_candle():
 
 
 @pytest.fixture(scope="module")
-def testclient(options, async_client, all_tickers, all_symbols, history_1m, historical_candle, candle):
+def testclient(
+    options,
+    async_client,
+    all_tickers,
+    all_symbols,
+    history_1m,
+    historical_candle,
+    candle,
+):
     class TestClient(_BaseClient):
         """A mock client implementation."""
 
@@ -86,7 +96,6 @@ def testclient(options, async_client, all_tickers, all_symbols, history_1m, hist
     tc = TestClient(options)
     yield tc
     tc.stop()
-
 
 
 # Unit tests ----------------------------------------------------------
