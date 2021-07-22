@@ -1,28 +1,65 @@
 import asyncio
+from binance.client import AsyncClient
 
 
 class _AsyncBot:
-    """Holds internal implementation of bot. Can run in separate process of thread."""
+    """Holds internal implementation of bot.
+    Can run in separate process of thread.
+    """
 
     def __init__(self, options):
+
         self.options = options
         self.candles = {}
         self.user_events = []
+
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
         self.q = asyncio.Queue()
 
-    def download_all_symbols(self, options):
-        pass
+        self.shutdown_flag = False
+        self.finished_history_download = set()
+
+        self.loop.run_until_complete(self.prepare)
+        self.loop.run_until_complete(self.start_loops)
+
+    async def prepare(self):
+        self.client = await AsyncClient.create(
+            api_key=self.options.api_key, api_secret=self.options.api_secret
+        )
+        self.all_symbols = await self.download_all_symbols(self.client)
+        self.selected_symbols = self.select_symbols(
+            self.all_symbols, self.options
+        )
+        self.exchange_info = await self.download_exchange_info(self.client)
+        self.account_info = await self.download_account_info(self.client)
+
+    async def download_all_symbols(self, client):
+        tickers = await client.get_all_tickers()
+        all_symbols = set()
+        [all_symbols.add(t["symbol"]) for t in tickers]
+        return all_symbols
 
     def select_symbols(self, all_symbols, options):
+        bs = set()
+        qs = set()
+        for s in all_symbols:
+            for b in options.base_assets:
+                if s.startswith(b):
+                    bs.add(s)
+            for q in options.quote_assets:
+                if s.endswith(q):
+                    qs.add(s)
+
+        return bs.intersection(qs)
+
+    async def download_exchange_info(self, client):
         pass
 
-    def download_exchange_info(self):
+    async def download_account_info(self, client):
         pass
 
-    def download_account_info(self):
-        pass
-
-    def start_loops(self):
+    async def start_loops(self):
         pass
 
     async def public_interface_listener(self):
