@@ -20,8 +20,9 @@ class _AsyncBot:
         self.shutdown_flag = False
         self.finished_history_download = set()
 
-        self.loop.run_until_complete(self.prepare)
-        self.loop.run_until_complete(self.start_loops)
+        if options.mode != "DEBUG":
+            self.loop.run_until_complete(self.prepare)
+            self.loop.run_until_complete(self.start_loops)
 
     async def prepare(self):
         self.client = await AsyncClient.create(
@@ -56,7 +57,9 @@ class _AsyncBot:
     async def download_exchange_info(self, client):
         status = await client.get_system_status()
         if status:
-            raise Exception("System in maintainance mode. Shutting down Bbot...")
+            raise Exception(
+                "System in maintainance mode. Shutting down Bbot..."
+            )
         info = await client.exchange_info()
         # TODO: parse info
         parsed = {}

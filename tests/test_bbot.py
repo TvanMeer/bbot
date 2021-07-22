@@ -1,23 +1,20 @@
-"""
 import pytest
 
 from bbot.bbot import Bot
-from bbot.client.binance_client import _BinanceClient
+from bbot.asyncbot import _AsyncBot
 from bbot.options import Options
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def bot():
     # Bot with default demo options.
     return Bot(options=Options())
 
 
-def test_stop(bot):
-    # assert bot.stop() == ...
+def test_stop():
     pass
 
 
-def test__create_client(bot):
-    assert bot._bc is _BinanceClient
-    assert bot._bc == _BinanceClient(Options())
-"""
+def test_create_client():
+    assert bot.options == Options()
+    assert bot._bot is _AsyncBot

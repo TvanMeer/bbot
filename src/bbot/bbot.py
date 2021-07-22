@@ -1,5 +1,4 @@
 from .options import Options
-
 from .asyncbot import _AsyncBot
 
 
@@ -12,8 +11,9 @@ class Bot:
 
     # Internal
     def __init__(self, options: Options) -> None:
-        self._create_client(options)
+        self.options = options
+        self._create_asyncbot(options)
 
-    def _create_client(self, options: Options) -> None:
+    def _create_asyncbot(self, options: Options) -> None:
         """Process fork or thread spawn here..."""
         self._bot = _AsyncBot(options)
