@@ -54,7 +54,13 @@ class _AsyncBot:
         return bs.intersection(qs)
 
     async def download_exchange_info(self, client):
-        pass
+        status = await client.get_system_status()
+        if status:
+            raise Exception("System in maintainance mode. Shutting down Bbot...")
+        info = await client.exchange_info()
+        # TODO: parse info
+        parsed = {}
+        return parsed
 
     async def download_account_info(self, client):
         pass
