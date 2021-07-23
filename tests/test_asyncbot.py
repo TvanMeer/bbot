@@ -1,6 +1,7 @@
 from binance.client import AsyncClient
 import asyncio
 import pytest
+import json
 
 from bbot.asyncbot import _AsyncBot
 from bbot.options import Options
@@ -63,8 +64,14 @@ def test_select_symbols(asyncbot):
 
 
 @pytest.mark.asyncio
-async def test_download_exchange_info():
-    pass
+async def test_download_exchange_info(asyncbot):
+
+    asyncbot.client = await AsyncClient.create()
+    info = await asyncbot.download_exchange_info(asyncbot.client)
+    assert isinstance(info, dict)
+    assert info["timezone"] == "UTC"
+    assert info["serverTime"] > 1627014234650
+    # print(json.dumps(info, indent=2))
 
 
 @pytest.mark.asyncio

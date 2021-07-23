@@ -65,15 +65,9 @@ class _AsyncBot:
         return selected
 
     async def download_exchange_info(self, client):
-        status = await client.get_system_status()
-        if status:
-            raise Exception(
-                "System in maintainance mode. Shutting down Bbot..."
-            )
-        # info = await client.exchange_info()
-        # TODO: parse info
-        parsed = {}
-        return parsed
+
+        info = await client.get_exchange_info()
+        return info
 
     async def download_account_info(self, client):
         pass
