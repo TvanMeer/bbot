@@ -99,6 +99,13 @@ class Options:
         raise Exception("Invalid input for option `windows` in bbot.Options")
 
     # Getters and setters
+    @property
+    def api_key(self) -> str:
+        return self._api_key
+
+    @property
+    def api_secret(self) -> str:
+        return self._api_secret
 
     @property
     def mode(self) -> str:

@@ -42,17 +42,27 @@ class _AsyncBot:
         return all_symbols
 
     def select_symbols(self, all_symbols, options):
-        bs = set()
-        qs = set()
+
+        selected = set()
+
+        def exact_match(b, q):
+
+            if "*" not in [b, q]:
+                left = s[: len(b)]
+                right = s[len(b) :]
+                if left == b and right == q:
+                    selected.add(s)
+            else:
+                selected.add(s)
+
         for s in all_symbols:
             for b in options.base_assets:
-                if s.startswith(b):
-                    bs.add(s)
-            for q in options.quote_assets:
-                if s.endswith(q):
-                    qs.add(s)
+                if s.startswith(b) or b == "*":
+                    for q in options.quote_assets:
+                        if s.endswith(q) or q == "*":
+                            exact_match(b, q)
 
-        return bs.intersection(qs)
+        return selected
 
     async def download_exchange_info(self, client):
         status = await client.get_system_status()
@@ -60,7 +70,7 @@ class _AsyncBot:
             raise Exception(
                 "System in maintainance mode. Shutting down Bbot..."
             )
-        info = await client.exchange_info()
+        # info = await client.exchange_info()
         # TODO: parse info
         parsed = {}
         return parsed
