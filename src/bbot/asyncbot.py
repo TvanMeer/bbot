@@ -15,7 +15,6 @@ class _AsyncBot:
 
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.q = asyncio.Queue()
 
         self.shutdown_flag = False
         self.finished_history_download = set()
@@ -34,6 +33,9 @@ class _AsyncBot:
         self.all_symbols = await self.download_all_symbols(self.client)
         self.selected_symbols = self.select_symbols(
             self.all_symbols, self.options
+        )
+        self.q = asyncio.Queue(
+            loop=self.loop, maxsize=len(self.selected_symbols)
         )
         self.exchange_info = await self.download_exchange_info(self.client)
         self.account_info = await self.download_account_info(self.client)

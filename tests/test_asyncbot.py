@@ -22,7 +22,6 @@ def test_init(asyncbot):
     assert asyncbot.user_events == []
     assert isinstance(asyncbot.loop, asyncio.BaseEventLoop)
     assert asyncbot.loop == asyncio.get_event_loop()
-    assert isinstance(asyncbot.q, asyncio.Queue)
 
 
 @pytest.mark.asyncio
@@ -35,6 +34,7 @@ async def test_prepare(asyncbot):
     await asyncbot.prepare()
     assert isinstance(asyncbot.all_symbols, set)
     assert isinstance(asyncbot.selected_symbols, set)
+    assert isinstance(asyncbot.q, asyncio.Queue)
     assert isinstance(asyncbot.exchange_info, dict)
     assert isinstance(asyncbot.account_info, dict)
 
