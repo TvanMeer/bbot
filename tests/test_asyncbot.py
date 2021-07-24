@@ -9,7 +9,11 @@ from bbot.options import Options
 
 @pytest.fixture()
 def asyncbot():
-    return _AsyncBot(Options())
+    with open("credentials.json", "r") as authfile:
+        data = authfile.read()
+        c = json.loads(data)
+        opt = Options(api_key=c["key"], api_secret=c["secret"])
+        return _AsyncBot(opt)
 
 
 def test_init(asyncbot):
@@ -35,6 +39,8 @@ async def test_download_all_symbols(asyncbot):
     for member in symbols:
         assert isinstance(member, str)
     assert len(symbols) > 500
+
+    await asyncbot.client.close_connection()
 
 
 def test_select_symbols(asyncbot):
@@ -73,12 +79,25 @@ async def test_download_exchange_info(asyncbot):
     assert info["serverTime"] > 1627014234650
     # print(json.dumps(info, indent=2))
 
-
-@pytest.mark.asyncio
-async def test_download_account_info():
-    pass
+    await asyncbot.client.close_connection()
 
 
 @pytest.mark.asyncio
-async def test_start_loops():
+async def test_download_account_info(asyncbot):
+
+    asyncbot.client = await AsyncClient.create(
+        api_key=asyncbot.options.api_key,
+        api_secret=asyncbot.options.api_secret,
+        testnet=True,
+    )
+    info = await asyncbot.download_account_info(asyncbot.client)
+    assert isinstance(info, dict)
+    assert info["canTrade"] == True
+    assert info["permissions"] == ["SPOT"]
+    print(json.dumps(info, indent=2))
+    await asyncbot.client.close_connection()
+
+
+@pytest.mark.asyncio
+async def test_start_loops(asyncbot):
     pass

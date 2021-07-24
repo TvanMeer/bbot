@@ -70,7 +70,9 @@ class _AsyncBot:
         return info
 
     async def download_account_info(self, client):
-        pass
+
+        info = await client.get_account()
+        return info
 
     async def start_loops(self):
         pass

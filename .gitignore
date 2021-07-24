@@ -130,3 +130,6 @@ dmypy.json
 
 # drawio
 /docs/*.drawio
+
+# Key and password
+credentials.json
