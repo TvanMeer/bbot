@@ -25,8 +25,11 @@ class _AsyncBot:
             self.loop.run_until_complete(self.start_loops)
 
     async def prepare(self):
+
         self.client = await AsyncClient.create(
-            api_key=self.options.api_key, api_secret=self.options.api_secret
+            api_key=self.options.api_key,
+            api_secret=self.options.api_secret,
+            testnet=self.options.mode == "DEBUG",
         )
         self.all_symbols = await self.download_all_symbols(self.client)
         self.selected_symbols = self.select_symbols(

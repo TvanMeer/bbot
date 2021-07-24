@@ -26,8 +26,17 @@ def test_init(asyncbot):
 
 
 @pytest.mark.asyncio
-async def test_prepare():
-    pass
+async def test_prepare(asyncbot):
+    asyncbot.client = await AsyncClient.create(
+        api_key=asyncbot.options.api_key,
+        api_secret=asyncbot.options.api_secret,
+        testnet=True,
+    )
+    await asyncbot.prepare()
+    assert isinstance(asyncbot.all_symbols, set)
+    assert isinstance(asyncbot.selected_symbols, set)
+    assert isinstance(asyncbot.exchange_info, dict)
+    assert isinstance(asyncbot.account_info, dict)
 
 
 @pytest.mark.asyncio
@@ -77,7 +86,7 @@ async def test_download_exchange_info(asyncbot):
     assert isinstance(info, dict)
     assert info["timezone"] == "UTC"
     assert info["serverTime"] > 1627014234650
-    # print(json.dumps(info, indent=2))
+    print(json.dumps(info, indent=2))
 
     await asyncbot.client.close_connection()
 
@@ -94,10 +103,56 @@ async def test_download_account_info(asyncbot):
     assert isinstance(info, dict)
     assert info["canTrade"] == True
     assert info["permissions"] == ["SPOT"]
-    print(json.dumps(info, indent=2))
+    # print(json.dumps(info, indent=2))
     await asyncbot.client.close_connection()
 
 
 @pytest.mark.asyncio
 async def test_start_loops(asyncbot):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_public_interface_listener(asyncbot):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_history_downloader(asyncbot):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_candle_streamer(asyncbot):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_user_event_listener(asyncbot):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_consumer(asyncbot):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_log_raw_data(asyncbot):
+    pass
+
+
+def test_dispatch_event(asyncbot):
+    pass
+
+
+def test_handle_public_request(asyncbot):
+    pass
+
+
+def test_handle_candle(asyncbot):
+    pass
+
+
+def test_handle_user_event(asyncbot):
     pass
