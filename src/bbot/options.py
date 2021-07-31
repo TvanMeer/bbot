@@ -78,7 +78,7 @@ class Options:
     # Setters
     def _error(self, attr_name):
         raise Exception(
-            f"Invalid input for option {attr_name} in bbot.Options"
+            f"Invalid input for option `{attr_name}` in bbot.Options"
         )
 
     def _validate_credential(self, attr_name, cred):
@@ -86,9 +86,10 @@ class Options:
             pass
         elif len(cred) != 64:
             self._error(attr_name)
-        for c in cred:
-            if not c.isalpha() or c.isdigit():
-                self._error(attr_name)
+        else:
+            for char in cred:
+                if not (char.isalpha() or char.isdigit()):
+                    self._error(attr_name)
 
     @api_key.setter
     def api_key(self, key):
@@ -108,33 +109,30 @@ class Options:
         else:
             self._error("mode")
 
-    def _validate_asset_str(self, attr, a):
-        checks = [
-            type(a) is str,
-            a.isalpha(),
-            len(a) < 10,
-        ]
-        if sum(checks) == 3:
-            return a.upper()
-        else:
-            self._error(attr)
-
     def _set_assets(self, attr, a):
-        def validate(attr, s):
-            return self._validate_asset_str(attr, s)
+        def validate(attr, asset):
+            checks = [
+                type(asset) is str,
+                asset.isalpha(),
+                len(asset) < 10,
+            ]
+            if sum(checks) == 3:
+                return asset.upper()
+            else:
+                self._error(attr)
 
-        def set_a(s):
-            setattr(self, "_" + attr, s)
+        def set_asset(attr, asset):
+            setattr(self, "_" + attr, asset)
 
         if a == "*":
-            set_a("*")
+            set_asset(attr, ["*"])
         elif type(a) is str:
             v = validate(attr, a)
-            set_a(set(v))
+            set_asset(attr, [v])
         elif type(a) is list:
-            res = set()
-            [res.add(validate(attr, asset)) for asset in a]
-            set_a(res)
+            checked = []
+            [checked.append(validate(attr, asset)) for asset in a]
+            set_asset(attr, checked)
         else:
             self._error(attr)
 
@@ -144,7 +142,7 @@ class Options:
 
     @quote_assets.setter
     def quote_assets(self, quote_assets: Union[str, List[str]]):
-        if quote_assets == "*" and self.base_assets == "*":
+        if quote_assets == "*" and self.base_assets == ["*"]:
             raise Exception("Cannot use * for both base and quote assets")
         self._set_assets("quote_assets", quote_assets)
 
@@ -161,7 +159,7 @@ class Options:
         def validate_winsize(winsize):
             checks = [
                 type(winsize) is int,
-                len(winsize) <= 500,
+                winsize <= 500,
                 winsize % 2 == 0,
             ]
             if sum(checks) != 3:

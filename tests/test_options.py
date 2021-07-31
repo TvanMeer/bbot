@@ -1,120 +1,79 @@
 import pytest
-
 from bbot.options import Options
 
 
 @pytest.fixture
 def options():
-    # Default demo options.
     return Options()
 
 
-def test_verify_clean_mode(options):
-    assert options._verify_clean_mode("DEBUG") == "DEBUG"
-    assert options._verify_clean_mode("HISTORY") == "HISTORY"
-    assert options._verify_clean_mode("STREAM") == "STREAM"
-    assert options._verify_clean_mode("PAPER") == "PAPER"
-    assert options._verify_clean_mode("TESTNET") == "TESTNET"
-    assert options._verify_clean_mode("TRADE") == "TRADE"
-    with pytest.raises(Exception):
-        options._verify_clean_mode("foo")
-    assert options._verify_clean_mode("DeBuG") == "DEBUG"
+def test_api_key_secret(options):
+    valid = [
+        " ",
+        "nsfXDBT5fTeYJX3QXECFyHzkQJfznfhY62bSI8AVYT4ITdofNbcImikj3tZVWUig",
+    ]
+    invalid = [
+        "sfXDBT5fTeYJX3QXECFyHzkQJfznfhY62bSI8AVYT4ITdofNbcImikj3tZVWUig",
+        "nsfXDBT5fTeYJX3QXECFyHzkQJfzn?hY62bSI8AVYT4ITdofNbcImikj3tZVWUig",
+    ]
+    for v in valid:
+        options.api_key = v
+        options.api_secret = v
+        assert options._api_key == v
+        assert options._api_secret == v
+    for i in invalid:
+        with pytest.raises(Exception):
+            options.api_key = i
+        with pytest.raises(Exception):
+            options.api_secret = i
 
 
-def test_verify_clean_base_assets(options):
-    assert options._verify_clean_base_assets("BTC") == frozenset(
-        [
-            "BTC",
-        ]
-    )
-    assert options._verify_clean_base_assets("*") == frozenset(
-        [
-            "*",
-        ]
-    )
-    with pytest.raises(Exception):
-        options._verify_clean_base_assets("BvghvhgvghvhvC")
-    with pytest.raises(Exception):
-        options._verify_clean_base_assets("BT123C")
+def test_mode(options):
 
-    assert options._verify_clean_base_assets(["BTC", "ADA"]) == frozenset(
-        ["BTC", "ADA"]
-    )
-    assert options._verify_clean_base_assets(["Btc", "ada"]) == frozenset(
-        ["BTC", "ADA"]
-    )
+    options.mode = "DEBUG"
+    assert options._mode == "DEBUG"
     with pytest.raises(Exception):
-        options._verify_clean_base_assets(["BT123C", "ADA"])
-    with pytest.raises(Exception):
-        options._verify_clean_base_assets(["BTgchgghchcC", "ADA"])
+        options.mode = "foo"
 
 
-def test_verify_clean_windows(options):
-    assert options._verify_clean_windows({"1m": 500, "15m": 200}) == {
-        "1m": 500,
-        "15m": 200,
-    }
+def test_assets(options):
+
+    valid = ["btc", "ETH", "*", "USDT", ["XRP", "hot"]]
+    expected = [["BTC"], ["ETH"], ["*"], ["USDT"], ["XRP", "HOT"]]
+    invalid = [7, "abcdefghij", "b?c"]
+
+    for v, e in zip(valid, expected):
+        options.base_assets = v
+        assert options._base_assets == e
+
+    for v, e in zip(valid, expected):
+        options.quote_assets = v
+        assert options._quote_assets == e
+
     with pytest.raises(Exception):
-        options._verify_clean_windows({"2m": 500, "15m": 200})
-    with pytest.raises(Exception):
-        options._verify_clean_windows({"1m": 502, "15m": 200})
-    with pytest.raises(Exception):
-        options._verify_clean_windows(["2m", 500, "15m", 200])
-    with pytest.raises(Exception):
-        options._verify_clean_windows({"2m", 500, "15m", 3})
+        options.base_assets = "*"
+        options.quote_assets = "*"
+
+    for i in invalid:
+        with pytest.raises(Exception):
+            options.base_assets = i
+        with pytest.raises(Exception):
+            options.quote_assets = i
 
 
-def test_getters(options):
-    assert options._api_key == " "
-    assert options._api_secret == " "
-    assert options.mode == "DEBUG"
-    assert options.base_assets == frozenset(
-        [
-            "BTC",
-        ]
-    )
-    assert options.quote_assets == frozenset(
-        [
-            "USDT",
-        ]
-    )
-    assert options.windows == {"1m": 500, "15m": 200}
-    assert options.possible_intervals == {
-        "2s": 2000,
-        "1m": 60000,
-        "3m": 180000,
-        "5m": 300000,
-        "15m": 900000,
-        "30m": 1800000,
-        "1h": 3600000,
-        "2h": 7200000,
-        "4h": 14400000,
-        "6h": 21600000,
-        "8h": 28800000,
-        "12h": 43200000,
-        "1d": 86400000,
-        "3d": 259200000,
-        "1w": 604800000,
-    }
-    assert options.possible_modes == frozenset(
-        ["DEBUG", "HISTORY", "STREAM", "PAPER", "TESTNET", "TRADE"]
-    )
+def test_windows(options):
 
+    valid = {"2s": 200, "1m": 100}
+    invalid = [
+        {"2s": 200, "1m": 100.1},
+        {"2s": 200, "1m": 502},
+        {"2S": 200, "1m": 100},
+        {"2s": 201, "1m": 100},
+    ]
 
-def test_setters(options):
-    options.mode = "PAPER"
-    assert options.mode == "PAPER"
-    options.base_assets = "XRP"
-    assert options.base_assets == frozenset(
-        [
-            "XRP",
-        ]
-    )
-    options.quote_assets = "USDC"
-    assert options.quote_assets == frozenset(
-        [
-            "USDC",
-        ]
-    )
-    options.windows = {"1h": 300}
-    assert options.windows == {"1h": 300}
+    options.windows = valid
+    assert options._windows == valid
+
+    for i in invalid:
+        with pytest.raises(Exception):
+            options.windows = i
