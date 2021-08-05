@@ -1,0 +1,96 @@
+List of all apicalls that will be used.
+? are optional, maybe not necessary.
+
+https://binance-docs.github.io/apidocs/spot/en/#change-log
+
+
+Anon:
+
+Check Server Time
+
+Exchange Information
+
+Order Book ?
+
+Recent Trades List ?
+
+Old Trade Lookup ?
+
+Compressed/Aggregate Trades List ?
+
+Kline/Candlestick Data
+
+
+
+User specific:
+
+Daily Account Snapshot (USER_DATA) ?
+
+Account Information (USER_DATA)
+
+Account Status (USER_DATA)
+
+Account API Trading Status (USER_DATA)
+
+Trade Fee (USER_DATA)
+
+Get API Key Permission (USER_DATA)
+
+Test New Order (TRADE)
+
+New Order (TRADE)
+
+Cancel Order (TRADE)
+
+Cancel all Open Orders on a Symbol (TRADE)
+
+Query Order (USER_DATA) ?
+
+Current Open Orders (USER_DATA) ?
+
+All Orders (USER_DATA)
+
+Account Trade List (USER_DATA) ?
+
+New OCO (TRADE) ?
+
+Cancel OCO (TRADE) ?
+
+
+
+Anon streams:
+
+Aggregate Trade Streams ?
+
+Trade Streams ?
+
+Kline/Candlestick Streams
+
+Individual Symbol Mini Ticker Stream ?
+
+All Market Mini Tickers Stream ?
+
+Individual Symbol Ticker Streams ?
+
+All Market Tickers Stream ?
+
+Individual Symbol Book Ticker Streams ?
+
+All Book Tickers Stream ?
+
++ Depth Cache
+
+
+
+User specific streams:
+
+User Data Streams
+
+
+
+
+
+
+
+
+
