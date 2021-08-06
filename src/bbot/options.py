@@ -13,7 +13,8 @@ class Options:
         mode: str = "DEBUG",
         base_assets: Union[str, List[str]] = "BTC",
         quote_assets: Union[str, List[str]] = "USDT",
-        windows: Dict[str, int] = {"1m": 500, "15m": 200},
+        windows: Dict[str, Union[int, str]] = {"1m": 500, "15m": "*"},
+        datasources: Union[str, List[str]] = "Candlestick",
     ):
 
         self._POSSIBLE_INTERVALS = {
@@ -43,12 +44,25 @@ class Options:
             "TRADE",
         }
 
+        self._POSSIBLE_DATA_SOURCES = {
+            "candlestick",
+            "bookticker",
+            "aggtrade",
+            "trade",
+            "miniticker24",
+            "ticker24",
+            "depth5",
+            "depth10",
+            "depth20",
+        }
+
         self._api_key = api_key
         self._api_secret = api_secret
         self._mode = mode
         self._base_assets = base_assets
         self._quote_assets = quote_assets
         self._windows = windows
+        self._datasources = datasources
 
     # Getters
     @property
@@ -64,16 +78,20 @@ class Options:
         return self._mode
 
     @property
-    def base_assets(self) -> set[str]:
+    def base_assets(self) -> List[str]:
         return self._base_assets
 
     @property
-    def quote_assets(self) -> set[str]:
+    def quote_assets(self) -> List[str]:
         return self._quote_assets
 
     @property
     def windows(self) -> Dict[str, int]:
         return self._windows
+
+    @property
+    def datasources(self) -> set[str]:
+        return self._datasources
 
     # Setters
     def _error(self, attr_name):
@@ -168,3 +186,33 @@ class Options:
         [validate_interval(iv) for iv in intervals]
         [validate_winsize(w) for w in winsizes]
         self._windows = windows
+
+    @datasources.setter
+    def datasources(self, datasources: Union[str, List[str]]):
+        def set_datasource_str(ds):
+            d = ds.lower()
+            if d in self._POSSIBLE_DATA_SOURCES:
+                self._datasources = {d}
+            else:
+                self._error("datasources")
+
+        def set_datasource_list(ds):
+            result = set()
+            for d in ds:
+                dl = d.lower()
+                checks = [
+                    type(dl) is str,
+                    dl in self._POSSIBLE_DATA_SOURCES,
+                ]
+                if sum(checks) == 2:
+                    result.add(dl)
+                else:
+                    self._error("datasources")
+            self._datasources = result
+
+        if type(datasources) is str:
+            set_datasource_str(datasources)
+        elif type(datasources) is list:
+            set_datasource_list(datasources)
+        else:
+            self._error("datasources")

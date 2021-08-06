@@ -77,3 +77,21 @@ def test_windows(options):
     for i in invalid:
         with pytest.raises(Exception):
             options.windows = i
+
+
+def test_datasources(options):
+
+    valid = ["candlestick", "CAndlestick", ["trade", "depth5"]]
+    invalid = ["caandlestick", 5]
+
+    for v in valid:
+        options.datasources = v
+        if type(v) is str:
+            vl = v.lower()
+            assert options._datasources == {vl}
+        if type(v) is list:
+            assert options._datasources == set(v)
+
+    for v in invalid:
+        with pytest.raises(Exception):
+            options.datasources = v
