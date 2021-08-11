@@ -7,7 +7,7 @@ class Database:
         self.exchange_info = None
         self.account_info = None
 
-        self.timeframes = None
+        self._timeframes = None
         self.coininfo = None
         self.user_events = []
 
@@ -78,16 +78,16 @@ class Database:
         }
 
         """
-        return self.timeframes
+        return self._timeframes
 
     # Internal
     def _init_timeframes(self, selected_symbols):
         tf = {}
-        for s in selected_symbols:
-            tf[s] = {}
-            for interval in self.OPTIONS.keys():
-                tf[s][interval] = []
-        self.timeframes = tf
+        for sym in selected_symbols:
+            tf[sym] = {}
+            for interval in self.OPTIONS.windows.keys():
+                tf[sym][interval] = []
+        self._timeframes = tf
 
     def _init_coininfo(self, selected_symbols):
         for s in selected_symbols:
