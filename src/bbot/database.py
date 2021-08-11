@@ -92,6 +92,3 @@ class Database:
     def _init_coininfo(self, selected_symbols):
         for s in selected_symbols:
             self.coininfo[s] = {}
-
-    def _select_symbols(self, all_symbols):
-        pass  # TODO: from asyncbot
