@@ -52,12 +52,57 @@ class _SymbolProcessor(_BaseProcessor):
     def process(self, tickers_list: List, database: Database) -> Database:
         return super().pipe("symbol", tickers_list, database)
 
+    def process_all_symbols(
+        self, tickers_list: List, database: Database
+    ) -> Database:
+        parsed = self.parse(tickers_list)
+        validated = self.validate(parsed, database)
+        database.ALL_SYMBOLS = validated
+        return database
+
+    def parse(self, raw_data: List) -> set:
+        symbols = set()
+        for ticker in raw_data:
+            symbols.add(ticker["symbol"])
+        return symbols
+
+    def validate(self, parsed_data: set, database: Database) -> set:
+        if len(parsed_data) > 50:
+            return parsed_data
+        else:
+            raise Exception("Could not download all tickers from Binance.")
+
+    def filterr(self, validated_data: set, options: Options) -> set:
+
+        selected = set()
+
+        def exact_match(sym, base, quote):
+
+            if "*" in [base, quote]:
+                selected.add(sym)
+            else:
+                left = sym[: len(base)]
+                right = sym[len(base) :]
+                if left == base and right == quote:
+                    selected.add(sym)
+
+        for sym in validated_data:
+            for base in options.base_assets:
+                if sym.startswith(base) or base == "*":
+                    for quote in options.quote_assets:
+                        if sym.endswith(quote) or quote == "*":
+                            exact_match(sym, base, quote)
+
+        return selected
+
+    def insert(self, filtered_data: set, database: Database) -> Database:
+        database.SELECTED_SYMBOLS = filtered_data
+        return database
+
 
 class _HistoricalCandleProcessor(_BaseProcessor):
     def process(self, historical_candle: List, database: Database) -> Database:
-        return super().pipe(
-            "historical_candle", historical_candle, database
-        )
+        return super().pipe("historical_candle", historical_candle, database)
 
 
 class _StreamedCandleProcessor(_BaseProcessor):
