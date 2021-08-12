@@ -1,4 +1,12 @@
 class Database:
+
+    _singleton = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._singleton:
+            cls._singleton = super(Database, cls).__new__(cls, *args, **kwargs)
+        return cls._singleton
+
     def __init__(self, options):
         self.OPTIONS = options
         self.ALL_SYMBOLS = None
@@ -29,7 +37,7 @@ class Database:
             self.coininfo[s] = {}
 
     # Public
-    @property    #TODO: coininfo also in _realtime_data
+    @property  # TODO: coininfo also in _realtime_data
     def get(self):
         """
         Gets dict with all windows for all selected symbols.
@@ -96,5 +104,3 @@ class Database:
 
         """
         return self._realtime_data
-
-    
