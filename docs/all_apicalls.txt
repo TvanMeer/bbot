@@ -60,11 +60,11 @@ Cancel OCO (TRADE) ?
 
 Anon streams:
 
+Kline/Candlestick Streams
+
 Aggregate Trade Streams ?
 
 Trade Streams ?
-
-Kline/Candlestick Streams
 
 Individual Symbol Mini Ticker Stream ?
 
