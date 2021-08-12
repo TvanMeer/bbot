@@ -6,13 +6,30 @@ class Database:
 
         self.exchange_info = None
         self.account_info = None
-
-        self._timeframes = None
+        self._realtime_data = None
         self.coininfo = None
         self.user_events = []
 
+        # State variables
+        self._current_event_time_open = int
+        self._current_event_time_close = int
+        self._history_download_finished_symbols = set()
+
+    # Internal
+    def _init_timeframes(self, selected_symbols):
+        tf = {}
+        for sym in selected_symbols:
+            tf[sym] = {}
+            for interval in self.OPTIONS.windows.keys():
+                tf[sym][interval] = []
+        self._realtime_data = tf
+
+    def _init_coininfo(self, selected_symbols):
+        for s in selected_symbols:
+            self.coininfo[s] = {}
+
     # Public
-    @property
+    @property    #TODO: coininfo also in _realtime_data
     def get(self):
         """
         Gets dict with all windows for all selected symbols.
@@ -78,17 +95,6 @@ class Database:
         }
 
         """
-        return self._timeframes
+        return self._realtime_data
 
-    # Internal
-    def _init_timeframes(self, selected_symbols):
-        tf = {}
-        for sym in selected_symbols:
-            tf[sym] = {}
-            for interval in self.OPTIONS.windows.keys():
-                tf[sym][interval] = []
-        self._timeframes = tf
-
-    def _init_coininfo(self, selected_symbols):
-        for s in selected_symbols:
-            self.coininfo[s] = {}
+    
