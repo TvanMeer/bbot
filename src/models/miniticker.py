@@ -18,10 +18,10 @@ class MiniTicker(BaseModel):
 
     """
 
-    event_time:                 int     # E
-    current_price:              float   # c
-    price_24_hours_ago:         float   # o
-    high_price_last_24_hours:   float   # h
-    low_price_last_24_hours:    float   # l
-    base_volume_last_24_hours:  float   # v
-    quote_volume_last_24_hours: float   # q
+    event_time:             int     # E
+    current_price:          float   # c
+    price_24_hours_ago:     float   # o
+    high_price_last_24h:    float   # h
+    low_price_last_24h:     float   # l
+    base_volume_last_24h:   float   # v
+    quote_volume_last_24h:  float   # q
