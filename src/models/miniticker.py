@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import time
 
 
 class MiniTicker(BaseModel):
@@ -18,7 +19,7 @@ class MiniTicker(BaseModel):
 
     """
 
-    event_time:             int     # E
+    event_time:             time    # E
     current_price:          float   # c
     price_24_hours_ago:     float   # o
     high_price_last_24h:    float   # h

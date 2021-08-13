@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import time
 
 
 class Candle(BaseModel):
@@ -31,9 +32,9 @@ class Candle(BaseModel):
 
     """
 
-    event_time:         int     # E
-    open_time:          int     # t
-    close_time:         int     # T
+    event_time:         time    # E
+    open_time:          time    # t
+    close_time:         time    # T
     open_price:         float   # o
     close_price:        float   # c
     high_price:         float   # h
