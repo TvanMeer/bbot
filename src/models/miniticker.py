@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class MiniTicker(BaseModel):
     """24 hour rolling window statistics.
 
-        {
+    {
       "e": "24hrMiniTicker",  // Event type
       "E": 123456789,         // Event time
       "s": "BNBBTC",          // Symbol

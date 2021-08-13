@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class Candle(BaseModel):
     """Candlestick from websocket stream.
 
-        {
+    {
       "e": "kline",     // Event type
       "E": 123456789,   // Event time
       "s": "BNBBTC",    // Symbol
@@ -31,15 +31,15 @@ class Candle(BaseModel):
 
     """
 
-    event_time:         int
-    open_time:          int
-    close_time:         int
-    open_price:         float
-    close_price:        float
-    high_price:         float
-    low_price:          float
-    base_volume:        float
-    quote_volume:       float
-    base_volume_taker:  float
-    quote_volume_taker: float
-    n_trades:           int
+    event_time:         int     # E
+    open_time:          int     # t
+    close_time:         int     # T
+    open_price:         float   # o
+    close_price:        float   # c
+    high_price:         float   # h
+    low_price:          float   # l
+    base_volume:        float   # v
+    quote_volume:       float   # q
+    base_volume_taker:  float   # V
+    quote_volume_taker: float   # Q
+    n_trades:           int     # n
