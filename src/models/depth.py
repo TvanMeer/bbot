@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from typing import Tuple
 from datetime import time
+from pydantic import BaseModel
 
 
 class Depth5(BaseModel):
@@ -9,47 +10,47 @@ class Depth5(BaseModel):
     """
 
     last_update_time: time    
-    bid1:  float
-    ask1:  float
-    bid2:  float
-    ask2:  float
-    bid3:  float
-    ask3:  float
-    bid4:  float
-    ask4:  float
-    bid5:  float
-    ask5:  float
+    bid1:  Tuple[float, float]
+    ask1:  Tuple[float, float]
+    bid2:  Tuple[float, float]
+    ask2:  Tuple[float, float]
+    bid3:  Tuple[float, float]
+    ask3:  Tuple[float, float]
+    bid4:  Tuple[float, float]
+    ask4:  Tuple[float, float]
+    bid5:  Tuple[float, float]
+    ask5:  Tuple[float, float]
 
 class Depth10(Depth5):
-    bid6:  float
-    ask6:  float
-    bid7:  float
-    ask7:  float
-    bid8:  float
-    ask8:  float
-    bid9:  float
-    ask9:  float
-    bid10: float
-    ask10: float
+    bid6:  Tuple[float, float]
+    ask6:  Tuple[float, float]
+    bid7:  Tuple[float, float]
+    ask7:  Tuple[float, float]
+    bid8:  Tuple[float, float]
+    ask8:  Tuple[float, float]
+    bid9:  Tuple[float, float]
+    ask9:  Tuple[float, float]
+    bid10: Tuple[float, float]
+    ask10: Tuple[float, float]
 
 class Depth20(Depth10):
-    bid11: float
-    ask11: float
-    bid12: float
-    ask12: float
-    bid13: float
-    ask13: float
-    bid14: float
-    ask14: float
-    bid15: float
-    ask15: float
-    bid16: float
-    ask16: float
-    bid17: float
-    ask17: float
-    bid18: float
-    ask18: float
-    bid19: float
-    ask19: float
-    bid20: float
-    ask20: float
+    bid11: Tuple[float, float]
+    ask11: Tuple[float, float]
+    bid12: Tuple[float, float]
+    ask12: Tuple[float, float]
+    bid13: Tuple[float, float]
+    ask13: Tuple[float, float]
+    bid14: Tuple[float, float]
+    ask14: Tuple[float, float]
+    bid15: Tuple[float, float]
+    ask15: Tuple[float, float]
+    bid16: Tuple[float, float]
+    ask16: Tuple[float, float]
+    bid17: Tuple[float, float]
+    ask17: Tuple[float, float]
+    bid18: Tuple[float, float]
+    ask18: Tuple[float, float]
+    bid19: Tuple[float, float]
+    ask19: Tuple[float, float]
+    bid20: Tuple[float, float]
+    ask20: Tuple[float, float]
