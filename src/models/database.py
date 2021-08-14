@@ -2,7 +2,7 @@ from typing import Deque, Optional, Union
 from datetime import time
 from pydantic import BaseModel
 
-from bbot.options import Options
+from .options import Options
 from .candle import Candle
 from .ticker import MiniTicker, Ticker
 from .depth import Depth5, Depth10, Depth20
@@ -35,18 +35,23 @@ class Symbol(BaseModel):
     and additional metadata.
     """
 
-    windows: dict[str, Window]
+    windows: dict[Options.Interval, Window]
 
 
 class DataBase(BaseModel):
     """Contains all data.
     This class is injected in user defined feature functions.
 
-    db -> symbol -> window -> deque[timeframes]
+    db -> dict[symbols] -> dict[windows] -> deque[timeframes]
 
     Database contains one or more symbols, like `BTCUSDC` and `ETHBTC`.
     A symbol contains one or more windows, like `1m` and `4h`.
     A window holds a sequence of timeframes.
+
+    Example:
+    Get last 1 minute candle for symbol `BTCUSDC`:
+
+    db.symbols["BTCUSDC"].windows[Interval.minute_1].timeframes[-1]
     """
 
     options:                Options
