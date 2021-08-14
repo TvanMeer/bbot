@@ -77,4 +77,4 @@ class Options(BaseModel):
 
         asset_names = v.lower() if v is type(str) else list(map(str.lower, v))
         map(check_str, asset_names)
-        return asset_names
+        return list(asset_names)
