@@ -3,9 +3,9 @@ from datetime import time
 from pydantic import BaseModel
 
 from bbot.options import Options
-from candle import Candle
-from ticker import MiniTicker, Ticker
-from depth import Depth5, Depth10, Depth20
+from .candle import Candle
+from .ticker import MiniTicker, Ticker
+from .depth import Depth5, Depth10, Depth20
 
 
 class TimeFrame(BaseModel):
