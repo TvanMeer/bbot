@@ -2,6 +2,7 @@ from typing import Deque, Optional
 from datetime import time
 from pydantic import BaseModel
 
+from bbot.options import Options
 from candle import Candle
 from ticker import MiniTicker, Ticker
 from depth import Depth5, Depth10, Depth20
@@ -16,6 +17,7 @@ class TimeFrame(BaseModel):
 
     open_time:  time
     close_time: time
+
     candle:     Optional[Candle]
     miniticker: Optional[MiniTicker]
     ticker:     Optional[Ticker]
@@ -47,5 +49,12 @@ class DataBase(BaseModel):
     A window holds a sequence of timeframes.
     """
 
-    symbols: dict[str, Symbol]
+    options:                Options
+    all_symbols_at_binance: set
+    selected_symbols:       set
+    # exchange info
+    # account info
+
+    symbols:                dict[str, Symbol]
+    # user events
 
