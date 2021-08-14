@@ -1,6 +1,5 @@
 from typing import Callable, List, Literal, Optional, Union
-from pydantic import BaseModel
-from pydantic import validator
+from pydantic import BaseModel, validator
 from pydantic.types import DirectoryPath, PositiveInt, SecretStr
 
 
