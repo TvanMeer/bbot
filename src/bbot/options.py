@@ -19,7 +19,7 @@ class Options(BaseModel):
     quote_assets:     Union[str, List[str]]                     = ["USDT"]
     window_intervals: Union[str, List[str]]                     = ["2s", "1m"]
     window_length:    PositiveInt                               = 200
-    datasources:      Union[str, List[str]]                     = ["candle", "depth5", "miniticker"]
+    streams:          Union[str, List[str]]                     = ["candle", "depth5", "miniticker"]
     features:         Optional[Union[Callable, List[Callable]]] = None
 
 
@@ -58,8 +58,8 @@ class Options(BaseModel):
             return v
 
 
-    @validator("datasources")
-    def check_datasources(cls, v):
+    @validator("streams")
+    def check_streams(cls, v):
         allowed = {"candle", "miniticker", "ticker", "depth5", "depth10", "depth20"}
-        assert set(v).issubset(allowed), f"Valid datasources are: {allowed}"
+        assert set(v).issubset(allowed), f"Valid streams are: {allowed}"
         return v
