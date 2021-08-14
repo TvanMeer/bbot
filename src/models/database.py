@@ -1,4 +1,4 @@
-from typing import Deque, Optional
+from typing import Deque, Optional, Union
 from datetime import time
 from pydantic import BaseModel
 
@@ -21,9 +21,7 @@ class TimeFrame(BaseModel):
     candle:     Optional[Candle]
     miniticker: Optional[MiniTicker]
     ticker:     Optional[Ticker]
-    depth5:     Optional[Depth5]
-    depth10:    Optional[Depth10]
-    depth20:    Optional[Depth20]
+    depth:      Optional[Union[Depth5, Depth10, Depth20]]
 
 
 class Window(BaseModel):
@@ -33,7 +31,9 @@ class Window(BaseModel):
 
 
 class Symbol(BaseModel):
-    """Holds all data related to a symbol, such as `BTCUSDT`"""
+    """Holds all data related to a symbol, such as `BTCUSDT`,
+    and additional metadata.
+    """
 
     windows: dict[str, Window]
 
