@@ -1,4 +1,5 @@
 from typing import Callable, Iterable, Optional, Union
+from collections.abc import Iterable as CollIter
 from enum import Enum
 
 from pydantic import BaseModel, validator
@@ -78,3 +79,11 @@ class Options(BaseModel):
         asset_names = v.lower() if v is type(str) else list(map(str.lower, v))
         map(check_str, asset_names)
         return list(asset_names)
+
+
+    @validator("streams")
+    @classmethod
+    def make_stream_iterable(cls, v):
+        if isinstance(v, CollIter):
+            return [v]
+        return v
