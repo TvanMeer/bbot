@@ -12,7 +12,7 @@ class Options(BaseModel):
 
     class Mode(str, Enum):
         test       = "test"
-        debug      = "debug"
+        devel      = "devel"
         history    = "history"
         stream     = "stream"
         paper      = "paper"
