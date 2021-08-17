@@ -55,11 +55,14 @@ class DataBase(BaseModel):
     """
 
     options:                Options
-    all_symbols_at_binance: set
-    selected_symbols:       set
+
+    # Data not realtime:
+    all_symbols_at_binance: Optional[set]
+    selected_symbols:       Optional[set]
     # exchange info
     # account info
 
-    symbols:                dict[str, Symbol]
+    # Realtime data:
+    symbols:                Optional[dict[str, Symbol]]
     # user events
 
