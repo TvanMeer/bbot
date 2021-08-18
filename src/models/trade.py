@@ -26,8 +26,8 @@ class AggTrade(BaseModel):
     aggtrade_id:         PositiveInt
     first_trade_id:      PositiveInt
     last_trade_id:       conint(ge= first_trade_id)
-    price:               condecimal(gt= 0, max_digits=13)
-    quantity:            condecimal(gt= 0, max_digits=9)
+    price:               condecimal(decimal_places=8)
+    quantity:            condecimal(decimal_places=8)
     buyer_is_maker:      StrictBool
 
 
@@ -56,6 +56,6 @@ class Trade():
     trade_id:            PositiveInt
     buyer_order_id:      PositiveInt
     seller_order_id:     PositiveInt
-    price:               condecimal(gt= 0, max_digits=13)
-    quantity:            condecimal(gt= 0, max_digits=9)
+    price:               condecimal(decimal_places=8)
+    quantity:            condecimal(decimal_places=8)
     buyer_is_maker:      StrictBool
