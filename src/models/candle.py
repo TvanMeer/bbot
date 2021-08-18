@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from datetime import time
+
+from pydantic import BaseModel
+from pydantic.types import PositiveInt, condecimal
 
 
 class Candle(BaseModel):
@@ -32,15 +34,15 @@ class Candle(BaseModel):
 
     """
 
-    event_time:         time    # E
-    open_time:          time    # t
-    close_time:         time    # T
-    open_price:         float   # o
-    close_price:        float   # c
-    high_price:         float   # h
-    low_price:          float   # l
-    base_volume:        float   # v
-    quote_volume:       float   # q
-    base_volume_taker:  float   # V
-    quote_volume_taker: float   # Q
-    n_trades:           int     # n
+    event_time:         time                                 # E
+    open_time:          time                                 # t
+    close_time:         time                                 # T
+    open_price:         condecimal(decimal_places=8, gt=0)   # o
+    close_price:        condecimal(decimal_places=8, gt=0)   # c
+    high_price:         condecimal(decimal_places=8, gt=0)   # h
+    low_price:          condecimal(decimal_places=8, gt=0)   # l
+    base_volume:        condecimal(decimal_places=8)         # v
+    quote_volume:       condecimal(decimal_places=8)         # q
+    base_volume_taker:  condecimal(decimal_places=8)         # V
+    quote_volume_taker: condecimal(decimal_places=8)         # Q
+    n_trades:           PositiveInt                          # n
