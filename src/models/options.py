@@ -1,5 +1,5 @@
 from typing import Callable, Iterable, Optional, Union
-from collections.abc import Iterable as CollIter
+from collections.abc import Iterable as CollectionsIter
 from enum import Enum
 
 from pydantic import BaseModel, validator
@@ -19,7 +19,6 @@ class Options(BaseModel):
         paper      = "paper"
         trade      = "trade"
 
-
     class Stream(str, Enum):
         candle     = "candle"
         miniticker = "miniticker"
@@ -27,7 +26,8 @@ class Options(BaseModel):
         depth5     = "depth5"
         depth10    = "depth10"
         depth20    = "depth20"
-
+        aggtrade   = "aggtrade"
+        trade      = "trade"
 
     class Interval(str, Enum):
         second_2   = "2s"
@@ -46,8 +46,6 @@ class Options(BaseModel):
         day_3      = "3d"
         week_1     = "1w"
 
-
-
     key:              SecretStr                                     = " "
     secret:           SecretStr                                     = " "
     mode:             Mode                                          = Mode.test
@@ -58,8 +56,6 @@ class Options(BaseModel):
     window_length:    PositiveInt                                   = 200
     streams:          Union[Stream, Iterable[Stream]]               = [Stream.candle, Stream.depth5, Stream.miniticker]
     features:         Optional[Union[Callable, Iterable[Callable]]] = None
-
-
 
     @validator("key", "secret")
     @classmethod
@@ -84,6 +80,6 @@ class Options(BaseModel):
     @validator("streams")
     @classmethod
     def make_stream_iterable(cls, v):
-        if isinstance(v, CollIter):
+        if not isinstance(v, CollectionsIter):
             return [v]
         return v
