@@ -1,18 +1,20 @@
 from typing import Deque, Optional, Union
 from datetime import time
+
 from pydantic import BaseModel
 
 from .options import Options
 from .candle import Candle
 from .ticker import MiniTicker, Ticker
 from .depth import Depth5, Depth10, Depth20
+from .trade import AggTrade, Trade
 
 
 class TimeFrame(BaseModel):
     """Holds all data related to market events between two points in time.
     A window is a sequence of timeframes. If only candle data is
     selected, then `timeframe` is equivalent to `candle`.
-    Depth is the depthchart at open time of this timeframe.
+    Depth is the depthchart at close time of this timeframe.
     """
 
     open_time:  time
@@ -22,6 +24,8 @@ class TimeFrame(BaseModel):
     miniticker: Optional[MiniTicker]
     ticker:     Optional[Ticker]
     depth:      Optional[Union[Depth5, Depth10, Depth20]]
+    aggtrade:   Optional[Deque[AggTrade]]
+    trade:      Optional[Deque[Trade]]
 
 
 class Window(BaseModel):
