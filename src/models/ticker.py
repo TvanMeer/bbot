@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from datetime import time
+
+from pydantic import BaseModel
+from pydantic.types import PositiveInt, condecimal
 
 
 class MiniTicker(BaseModel):
@@ -19,13 +21,13 @@ class MiniTicker(BaseModel):
 
     """
 
-    event_time:             time    # E
-    current_price:          float   # c
-    price_24_hours_ago:     float   # o
-    high_price_last_24h:    float   # h
-    low_price_last_24h:     float   # l
-    base_volume_last_24h:   float   # v
-    quote_volume_last_24h:  float   # q
+    event_time:             time                           # E
+    current_price:          condecimal(decimal_places=8)   # c
+    price_24_hours_ago:     condecimal(decimal_places=8)   # o
+    high_price_last_24h:    condecimal(decimal_places=8)   # h
+    low_price_last_24h:     condecimal(decimal_places=8)   # l
+    base_volume_last_24h:   condecimal(decimal_places=8)   # v
+    quote_volume_last_24h:  condecimal(decimal_places=8)   # q
 
 
 class Ticker(BaseModel):
@@ -60,14 +62,14 @@ class Ticker(BaseModel):
 
     """
 
-    event_time:                    time    # E
-    current_price:                 float   # c
-    price_24_hours_ago:            float   # o
-    high_price_last_24h:           float   # h
-    low_price_last_24h:            float   # l
-    weighted_avg_price_last_24h:   float   # w
-    price_change_last_24h:         float   # p
-    price_change_last_24h_percent: float   # P
-    base_volume_last_24h:          float   # v
-    quote_volume_last_24h:         float   # q
-    n_trades_last_24h:             int     # n
+    event_time:                    time                           # E
+    current_price:                 condecimal(decimal_places=8)   # c
+    price_24_hours_ago:            condecimal(decimal_places=8)   # o
+    high_price_last_24h:           condecimal(decimal_places=8)   # h
+    low_price_last_24h:            condecimal(decimal_places=8)   # l
+    weighted_avg_price_last_24h:   condecimal(decimal_places=8)   # w
+    price_change_last_24h:         condecimal(decimal_places=8)   # p
+    price_change_last_24h_percent: condecimal(decimal_places=3)   # P
+    base_volume_last_24h:          condecimal(decimal_places=8)   # v
+    quote_volume_last_24h:         condecimal(decimal_places=8)   # q
+    n_trades_last_24h:             PositiveInt                    # n
