@@ -13,7 +13,6 @@ class Options(BaseModel):
 
     class Mode(str, Enum):
         test       = "test"
-        devel      = "devel"
         history    = "history"
         stream     = "stream"
         paper      = "paper"
@@ -46,6 +45,8 @@ class Options(BaseModel):
         day_3      = "3d"
         week_1     = "1w"
 
+
+
     key:              SecretStr                                     = " "
     secret:           SecretStr                                     = " "
     mode:             Mode                                          = Mode.test
@@ -57,9 +58,11 @@ class Options(BaseModel):
     streams:          Union[Stream, Iterable[Stream]]               = [Stream.candle, Stream.depth5, Stream.miniticker]
     features:         Optional[Union[Callable, Iterable[Callable]]] = None
 
+
+
     @validator("key", "secret")
     @classmethod
-    def check_credentials(cls, v):
+    def _check_credentials(cls, v):
         assert v == " " or len(v) == 64, "Both key and secret should be of length 64."
         assert v == " " or v.isalnum(), "Both key and secret should be alphanumeric."
         return v
@@ -67,7 +70,7 @@ class Options(BaseModel):
 
     @validator("base_assets", "quote_assets")
     @classmethod
-    def check_asset_names(cls, v):
+    def _check_asset_names(cls, v):
         def check_str(s):
             assert len(s) in range(3, 6), "Asset names should be between 3 and 6 characters long."
             assert s.isalnum(), "Asset names should be alphanumeric, like `BTC` or `USDC`."
@@ -79,7 +82,7 @@ class Options(BaseModel):
 
     @validator("streams")
     @classmethod
-    def make_stream_iterable(cls, v):
+    def _make_stream_iterable(cls, v):
         if not isinstance(v, CollectionsIter):
             return [v]
         return v
