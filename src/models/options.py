@@ -25,6 +25,7 @@ class Options(BaseModel):
         depth5     = "depth5"
         depth10    = "depth10"
         depth20    = "depth20"
+        orderbook  = "orderbook"
         aggtrade   = "aggtrade"
         trade      = "trade"
 
@@ -47,16 +48,16 @@ class Options(BaseModel):
 
 
 
-    key:              SecretStr                                     = " "
-    secret:           SecretStr                                     = " "
-    mode:             Mode                                          = Mode.test
-    datadir:          Optional[DirectoryPath]                       = None
-    base_assets:      Union[str, Iterable[str]]                     = ["BTC", "HOT"]
-    quote_assets:     Union[str, Iterable[str]]                     = ["USDT"]
-    window_intervals: Union[Interval, Iterable[Interval]]           = [Interval.second_2, Interval.minute_1]
-    window_length:    PositiveInt                                   = 200
-    streams:          Union[Stream, Iterable[Stream]]               = [Stream.candle, Stream.depth5, Stream.miniticker]
-    features:         Optional[Union[Callable, Iterable[Callable]]] = None
+    key:              SecretStr                                 = " "
+    secret:           SecretStr                                 = " "
+    mode:             Mode                                      = Mode.test
+    datadir:          Optional[DirectoryPath]                   = None
+    base_assets:      Union[str, Iterable[str]]                 = ["BTC", "HOT"]
+    quote_assets:     Union[str, Iterable[str]]                 = ["USDT"]
+    window_intervals: Union[Interval, Iterable[Interval]]       = [Interval.second_2, Interval.minute_1]
+    window_length:    PositiveInt                               = 200
+    streams:          Optional[Union[Stream, Iterable[Stream]]] = [Stream.candle, Stream.depth5, Stream.miniticker]
+    features:         Union[Callable, Iterable[Callable]]       = None
 
 
 

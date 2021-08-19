@@ -7,6 +7,7 @@ from .options import Options
 from .candle import Candle
 from .ticker import MiniTicker, Ticker
 from .depth import Depth5, Depth10, Depth20
+from .orderbook import OrderBook
 from .trade import AggTrade, Trade
 
 
@@ -24,6 +25,7 @@ class TimeFrame(BaseModel):
     miniticker: Optional[MiniTicker]
     ticker:     Optional[Ticker]
     depth:      Optional[Union[Depth5, Depth10, Depth20]]
+    orderbook:  Optional[OrderBook]
     aggtrade:   Optional[Deque[AggTrade]]
     trade:      Optional[Deque[Trade]]
 
