@@ -1,5 +1,7 @@
 from typing import Deque, Optional
 from pydantic import BaseModel
+from pydantic.class_validators import validator
+from pydantic.error_wrappers import ValidationError
 
 from .options import Options
 from .timeframe import TimeFrame
@@ -8,6 +10,18 @@ class Window(BaseModel):
     """Holds a sequence of timeframes and additional metadata."""
 
     timeframes: Deque[TimeFrame]
+
+    @validator("timeframes")
+    @classmethod
+    def insert_timeframe(self, v):
+        last = self.timeframes[-1]
+        interval_last = last.close_time - last.open_time
+        interval_new = v.close_time - v.open_time
+        if interval_last != interval_new:
+            raise ValidationError(f"Timeframe inserted in {interval_last}ms window instead of {interval_new}ms window.")
+        if last.close_time != v.open_time -1:
+            raise ValidationError(f"Data leakage: timeframe inserted in {interval_last}ms window is not the next in the sequence.")
+        return v
 
 
 class Symbol(BaseModel):
