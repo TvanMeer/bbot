@@ -11,7 +11,7 @@ class Window(BaseModel):
 
     timeframes: Deque[TimeFrame]
 
-    @validator("timeframes")
+    @validator("timeframes", each_item=True)
     @classmethod
     def insert_timeframe(self, v):
         last = self.timeframes[-1]

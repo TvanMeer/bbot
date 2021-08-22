@@ -35,6 +35,7 @@ class TimeFrame(BaseModel):
 
 
     @validator("candle")
+    @classmethod
     def update_candle(self, v):
         if self.candle == None:
             self._candle_prev_2s = v
