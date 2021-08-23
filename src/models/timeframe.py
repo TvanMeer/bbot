@@ -34,12 +34,45 @@ class TimeFrame(BaseModel):
 
 
 
+    @validator("close_time")
+    @classmethod
+    def check_interval(self, v):
+        s = 1000
+        m = s * 60
+        h = m * 60
+        d = h * 24
+        w = d * 7
+        if v.close_time - self.open_time in {
+            s * 2, 
+            m, 
+            m * 3, 
+            m * 5, 
+            m * 15, 
+            m * 30, 
+            h, 
+            h * 2,
+            h * 4,
+            h * 6,
+            h * 8,
+            h * 12,
+            d,
+            d * 3,
+            w
+        }:
+            return v
+        else:
+            raise ValidationError("Open or close time is invalid.")
+
+
+
     @validator("candle")
     @classmethod
     def update_candle(self, v):
+        # New candle
         if self.candle == None:
             self._candle_prev_2s = v
             return v
+
         if v.open_time < self.open_time:
             raise ValidationError("Attempted to add candle to the wrong timeframe. Needs to be in a previous timeframe.")
         if v.close_time > self.close_time:
@@ -67,3 +100,4 @@ class TimeFrame(BaseModel):
 
         self._candle_prev_2s = v
         return new
+
