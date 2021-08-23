@@ -20,6 +20,7 @@ class TimeFrame(BaseModel):
     """
 
     _candle_prev_2s:     Candle
+    _depth_last_update:  time
 
     open_time:           time
     close_time:          time
@@ -118,3 +119,20 @@ class TimeFrame(BaseModel):
                 f"Attempted to add miniticker in the wrong timeframe. Open en close time are {self.open_time} and {self.close_time}, but the event_time of new value is {v.event_time}."
             )
         return v
+
+
+
+    @validator("depth")
+    @classmethod
+    def update_depth(self, v):
+        if v.last_update_time <= self._depth_last_update:
+            raise ValidationError(
+                f"Depth update is old data."
+            )
+        if v.last_update_time > self.close_time:
+            raise ValidationError(
+                f"Depth update falls outside of this timeframe. Create a new timeframe."
+            )
+        self._depth_last_update = v.last_update_time
+        return v
+
