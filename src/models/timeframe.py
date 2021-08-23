@@ -43,7 +43,7 @@ class TimeFrame(BaseModel):
         h = m * 60
         d = h * 24
         w = d * 7
-        if v.close_time - self.open_time in {
+        if (v.close_time - self.open_time) +1 in {
             s * 2,
             m,
             m * 3,
@@ -151,7 +151,7 @@ class TimeFrame(BaseModel):
 
 
 
-    @validator("aggtrades")
+    @validator("aggtrades", each_item=True)
     @classmethod
     def update_aggtrades(self, v):
         diff = v.trade_id - self.aggtrades[-1].trade_id
@@ -175,7 +175,7 @@ class TimeFrame(BaseModel):
 
 
 
-    @validator("trades")
+    @validator("trades", each_item=True)
     @classmethod
     def update_trades(self, v):
         diff = v.trade_id - self.trades[-1].trade_id
