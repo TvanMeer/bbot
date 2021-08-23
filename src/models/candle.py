@@ -34,9 +34,6 @@ class Candle(BaseModel):
 
     """
 
-    event_time:         time                                 # E
-    open_time:          time                                 # t
-    close_time:         time                                 # T
     open_price:         condecimal(decimal_places=8, gt=0)   # o
     close_price:        condecimal(decimal_places=8, gt=0)   # c
     high_price:         condecimal(decimal_places=8, gt=0)   # h
