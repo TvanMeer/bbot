@@ -3,6 +3,7 @@ from collections.abc import Iterable as CollectionsIter
 from enum import Enum
 
 from pydantic import BaseModel, validator
+from pydantic.error_wrappers import ValidationError
 from pydantic.types import DirectoryPath, PositiveInt, SecretStr
 
 
@@ -48,24 +49,26 @@ class Options(BaseModel):
 
 
 
-    key:              SecretStr                                 = " "
-    secret:           SecretStr                                 = " "
-    mode:             Mode                                      = Mode.test
-    datadir:          Optional[DirectoryPath]                   = None
-    base_assets:      Union[str, Iterable[str]]                 = ["BTC", "HOT"]
-    quote_assets:     Union[str, Iterable[str]]                 = ["USDT"]
-    window_intervals: Union[Interval, Iterable[Interval]]       = [Interval.second_2, Interval.minute_1]
-    window_length:    PositiveInt                               = 200
-    streams:          Optional[Union[Stream, Iterable[Stream]]] = [Stream.candle, Stream.depth5, Stream.miniticker]
-    features:         Union[Callable, Iterable[Callable]]       = None
+    key:              SecretStr                                     = " "
+    secret:           SecretStr                                     = " "
+    mode:             Mode                                          = Mode.test
+    datadir:          Optional[DirectoryPath]                       = None
+    base_assets:      Union[str, Iterable[str]]                     = ["BTC", "HOT"]
+    quote_assets:     Union[str, Iterable[str]]                     = ["USDT"]
+    window_intervals: Union[Interval, Iterable[Interval]]           = [Interval.second_2, Interval.minute_1]
+    window_length:    PositiveInt                                   = 200
+    streams:          Optional[Union[Stream, Iterable[Stream]]]     = [Stream.candle, Stream.depth5, Stream.miniticker]
+    features:         Optional[Union[Callable, Iterable[Callable]]] = None
 
 
 
     @validator("key", "secret")
     @classmethod
     def _check_credentials(cls, v):
-        assert v == " " or len(v) == 64, "Both key and secret should be of length 64."
-        assert v == " " or v.isalnum(), "Both key and secret should be alphanumeric."
+        if not v == " " or not len(v) == 64:
+            raise ValidationError("Both key and secret should be of length 64.")
+        if not v == " " or not v.islanum():
+            raise ValidationError("Both key and secret should be alphanumeric.")
         return v
 
 
@@ -73,8 +76,10 @@ class Options(BaseModel):
     @classmethod
     def _check_asset_names(cls, v):
         def check_str(s):
-            assert len(s) in range(3, 6), "Asset names should be between 3 and 6 characters long."
-            assert s.isalnum(), "Asset names should be alphanumeric, like `BTC` or `USDC`."
+            if not len(s) in range(3, 6):
+                raise ValidationError("Asset names should be between 3 and 6 characters long.")
+            if not s.isalnum():
+                raise ValidationError("Asset names should be alphanumeric, like `BTC` or `USDC`.")
 
         asset_names = v.lower() if v is type(str) else list(map(str.lower, v))
         map(check_str, asset_names)
