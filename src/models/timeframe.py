@@ -19,19 +19,20 @@ class TimeFrame(BaseModel):
     Depth is the depthchart at close time of this timeframe.
     """
 
-    _candle_prev_2s:     Candle
-    _depth_last_update:  time
+    _candle_prev_2s:    Candle
+    _depth_last_update: time
+    _latency:           time
 
-    open_time:           time
-    close_time:          time
+    open_time:          time
+    close_time:         time
 
-    candle:              Optional[Candle]
-    miniticker:          Optional[MiniTicker]
-    ticker:              Optional[Ticker]
-    depth:               Optional[Union[Depth5, Depth10, Depth20]]
-    orderbook_updates:   Optional[Deque[OrderBookUpdate]]
-    aggtrades:           Optional[Deque[AggTrade]]
-    trades:              Optional[Deque[Trade]]
+    candle:             Optional[Candle]
+    miniticker:         Optional[MiniTicker]
+    ticker:             Optional[Ticker]
+    depth:              Optional[Union[Depth5, Depth10, Depth20]]
+    orderbook_updates:  Optional[Deque[OrderBookUpdate]]
+    aggtrades:          Optional[Deque[AggTrade]]
+    trades:             Optional[Deque[Trade]]
 
 
 
@@ -62,17 +63,17 @@ class TimeFrame(BaseModel):
         }:
             return v
         else:
-            raise ValidationError("Open or close time is invalid.")
+            raise ValidationError("Open or close time of this new timeframe is invalid.")
 
 
 
     @validator("candle")
     @classmethod
     def update_candle(self, v):
-        # New candle
-        if self.candle == None:
-            self._candle_prev_2s = v
-            return v
+        """Every timeframe gets updated by a 1 minute interval candle stream.
+        This way only one stream is needed for each symbol, when multiple time intervals
+        are selected.
+        """
 
         if v.open_time < self.open_time:
             raise ValidationError(
@@ -83,16 +84,22 @@ class TimeFrame(BaseModel):
                 "Attempted to add candle to the wrong timeframe. Needs to be in the next timeframe."
             )
 
+        # New candle
+        if self.candle == None:
+            self._candle_prev_2s = v
+            return v
+
         # Update candle
         new = self.candle
         new.close_price = v.close_price
-        new.high_price = v.high_price if v.high_price > new.high_price else new.high_price
-        new.low_price = v.low_price if v.low_price < new.low_price else new.low_price
-
-        is_new_1m = (
-            v.open_time != self._candle_prev_2s.open_time
-            and v.closetime != self._candle_prev_2s.close_time
+        new.high_price = (
+            v.high_price if v.high_price > new.high_price else new.high_price
         )
+        new.low_price = (
+            v.low_price if v.low_price < new.low_price else new.low_price
+        )
+
+        is_new_1m = v.open_price != self._candle_prev_2s.open_price
         if is_new_1m:
             new.base_volume += v.base_volume
             new.quote_volume += v.quote_volume
@@ -100,11 +107,21 @@ class TimeFrame(BaseModel):
             new.quote_volume_taker += v.quote_volume_taker
             new.n_trades += v.n_trades
         else:
-            new.base_volume += v.base_volume - self._candle_prev_2s.base_volume
-            new.quote_volume += v.quote_volume - self._candle_prev_2s.quote_volume
-            new.base_volume_taker += v.base_volume_taker - self._candle_prev_2s.base_volume_taker
-            new.quote_volume_taker += v.quote_volume_taker - self._candle_prev_2s.quote_volume_taker
-            new.n_trades += v.n_trades - self._candle_prev_2s.n_trades
+            new.base_volume += (
+                v.base_volume - self._candle_prev_2s.base_volume
+            )
+            new.quote_volume += (
+                v.quote_volume - self._candle_prev_2s.quote_volume
+            )
+            new.base_volume_taker += (
+                v.base_volume_taker - self._candle_prev_2s.base_volume_taker
+            )
+            new.quote_volume_taker += (
+                v.quote_volume_taker - self._candle_prev_2s.quote_volume_taker
+            )
+            new.n_trades += (
+                v.n_trades - self._candle_prev_2s.n_trades
+            )
 
         self._candle_prev_2s = v
         return new
@@ -113,10 +130,11 @@ class TimeFrame(BaseModel):
 
     @validator("miniticker", "ticker")
     @classmethod
-    def update_miniticker(self, v):
-        if v.event_time < self.open_time or v.event_time > self.close_time:
+    def update_ticker(self, v):
+        time = v.event_time - self._latency
+        if time < self.open_time or time > self.close_time:
             raise ValidationError(
-                f"Attempted to add miniticker in the wrong timeframe. Open en close time are {self.open_time} and {self.close_time}, but the event_time of new value is {v.event_time}."
+                f"Attempted to add miniticker in the wrong timeframe. Open en close time are {self.open_time} and {self.close_time}, but the time of this ticker update is {time}."
             )
         return v
 
@@ -127,11 +145,11 @@ class TimeFrame(BaseModel):
     def update_depth(self, v):
         if v.last_update_time <= self._depth_last_update:
             raise ValidationError(
-                f"Depth update is old data."
+                "Depth update is old data."
             )
         if v.last_update_time > self.close_time:
             raise ValidationError(
-                f"Depth update falls outside of this timeframe. Create a new timeframe."
+                "Depth update falls outside of this timeframe. Create a new timeframe."
             )
         self._depth_last_update = v.last_update_time
         return v
@@ -145,7 +163,7 @@ class TimeFrame(BaseModel):
             return v
         if v.update_id <= self.orderbook_updates[-1]:
             raise ValidationError(
-                f"Attempted to overwrite existing entries in orderbook."
+                "Attempted to overwrite existing entries in orderbook."
             )
         return v
 
@@ -163,13 +181,13 @@ class TimeFrame(BaseModel):
             raise ValidationError(
                 "Attempted to overwrite an existing aggregate trade."
             )
-        if v.trade_time <  self.open_time:
+        if v.trade_time < self.open_time:
             raise ValidationError(
-                f"Aggregate trade belongs in previous timeframe."
+                "Aggregate trade belongs in previous timeframe."
             )
         if v.trade_time > self.close_time:
             raise ValidationError(
-                f"Aggregate trade belongs in next timeframe."
+                "Aggregate trade belongs in next timeframe."
             )
         return v
 
@@ -187,15 +205,12 @@ class TimeFrame(BaseModel):
             raise ValidationError(
                 "Attempted to overwrite an existing trade."
             )
-        if v.trade_time <  self.open_time:
+        if v.trade_time < self.open_time:
             raise ValidationError(
-                f"Trade belongs in previous timeframe."
+                "Trade belongs in previous timeframe."
             )
         if v.trade_time > self.close_time:
             raise ValidationError(
-                f"Trade belongs in next timeframe."
+                "Trade belongs in next timeframe."
             )
         return v
-
-
-
