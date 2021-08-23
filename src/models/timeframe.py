@@ -29,9 +29,9 @@ class TimeFrame(BaseModel):
     miniticker:          Optional[MiniTicker]
     ticker:              Optional[Ticker]
     depth:               Optional[Union[Depth5, Depth10, Depth20]]
-    orderbook:           Optional[Deque[OrderBookUpdate]]
-    aggtrade:            Optional[Deque[AggTrade]]
-    trade:               Optional[Deque[Trade]]
+    orderbook_updates:   Optional[Deque[OrderBookUpdate]]
+    aggtrades:           Optional[Deque[AggTrade]]
+    trades:              Optional[Deque[Trade]]
 
 
 
@@ -138,15 +138,64 @@ class TimeFrame(BaseModel):
 
 
 
-    @validator("orderbook", each_item=True)
+    @validator("orderbook_updates", each_item=True)
     @classmethod
     def update_orderbook(self, v):
-        if self.orderbook == None:
+        if self.orderbook_updates == None:
             return v
-        if v.update_id <= self.orderbook[-1]:
+        if v.update_id <= self.orderbook_updates[-1]:
             raise ValidationError(
                 f"Attempted to overwrite existing entries in orderbook."
             )
         return v
+
+
+
+    @validator("aggtrades")
+    @classmethod
+    def update_aggtrades(self, v):
+        diff = v.trade_id - self.aggtrades[-1].trade_id
+        if diff > 1:
+            raise ValidationError(
+                f"Aggregate trade data missing {diff} trades."
+            )
+        if diff <= 0:
+            raise ValidationError(
+                "Attempted to overwrite an existing aggregate trade."
+            )
+        if v.trade_time <  self.open_time:
+            raise ValidationError(
+                f"Aggregate trade belongs in previous timeframe."
+            )
+        if v.trade_time > self.close_time:
+            raise ValidationError(
+                f"Aggregate trade belongs in next timeframe."
+            )
+        return v
+
+
+
+    @validator("trades")
+    @classmethod
+    def update_trades(self, v):
+        diff = v.trade_id - self.trades[-1].trade_id
+        if diff > 1:
+            raise ValidationError(
+                f"Trade data missing {diff} trades."
+            )
+        if diff <= 0:
+            raise ValidationError(
+                "Attempted to overwrite an existing trade."
+            )
+        if v.trade_time <  self.open_time:
+            raise ValidationError(
+                f"Trade belongs in previous timeframe."
+            )
+        if v.trade_time > self.close_time:
+            raise ValidationError(
+                f"Trade belongs in next timeframe."
+            )
+        return v
+
 
 
