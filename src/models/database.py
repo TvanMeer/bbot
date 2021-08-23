@@ -2,6 +2,7 @@ from typing import Deque, Optional
 from pydantic import BaseModel
 from pydantic.class_validators import validator
 from pydantic.error_wrappers import ValidationError
+from pydantic.types import constr
 
 from .options import Options
 from .timeframe import TimeFrame
@@ -29,7 +30,16 @@ class Symbol(BaseModel):
     and additional metadata.
     """
 
+    name:    constr(strip_whitespace=True, to_lower=True, min_length=3, max_length=6)
     windows: dict[Options.Interval, Window]
+
+    @validator("windows")
+    @classmethod
+    def make_windows_singleton(self, v):
+        if v.keys() in self.windows.keys():
+            raise ValidationError("Window already exists for this symbol.")
+        else:
+            return v
 
 
 class DataBase(BaseModel):
