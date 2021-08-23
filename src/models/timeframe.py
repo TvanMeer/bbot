@@ -18,19 +18,19 @@ class TimeFrame(BaseModel):
     selected, then `timeframe` is equivalent to `candle`.
     Depth is the depthchart at close time of this timeframe.
     """
-    _candle_prev_2s: Candle
-    _miniticker_prev_2s: MiniTicker
 
-    open_time:  time
-    close_time: time
+    _candle_prev_2s:     Candle
 
-    candle:     Optional[Candle]
-    miniticker: Optional[MiniTicker]
-    ticker:     Optional[Ticker]
-    depth:      Optional[Union[Depth5, Depth10, Depth20]]
-    orderbook:  Optional[OrderBook]
-    aggtrade:   Optional[Deque[AggTrade]]
-    trade:      Optional[Deque[Trade]]
+    open_time:           time
+    close_time:          time
+
+    candle:              Optional[Candle]
+    miniticker:          Optional[MiniTicker]
+    ticker:              Optional[Ticker]
+    depth:               Optional[Union[Depth5, Depth10, Depth20]]
+    orderbook:           Optional[OrderBook]
+    aggtrade:            Optional[Deque[AggTrade]]
+    trade:               Optional[Deque[Trade]]
 
 
 
@@ -43,13 +43,13 @@ class TimeFrame(BaseModel):
         d = h * 24
         w = d * 7
         if v.close_time - self.open_time in {
-            s * 2, 
-            m, 
-            m * 3, 
-            m * 5, 
-            m * 15, 
-            m * 30, 
-            h, 
+            s * 2,
+            m,
+            m * 3,
+            m * 5,
+            m * 15,
+            m * 30,
+            h,
             h * 2,
             h * 4,
             h * 6,
@@ -57,7 +57,7 @@ class TimeFrame(BaseModel):
             h * 12,
             d,
             d * 3,
-            w
+            w,
         }:
             return v
         else:
@@ -74,9 +74,13 @@ class TimeFrame(BaseModel):
             return v
 
         if v.open_time < self.open_time:
-            raise ValidationError("Attempted to add candle to the wrong timeframe. Needs to be in a previous timeframe.")
+            raise ValidationError(
+                "Attempted to add candle to the wrong timeframe. Needs to be in a previous timeframe."
+            )
         if v.close_time > self.close_time:
-            raise ValidationError("Attempted to add candle to the wrong timeframe. Needs to be in the next timeframe.")
+            raise ValidationError(
+                "Attempted to add candle to the wrong timeframe. Needs to be in the next timeframe."
+            )
 
         # Update candle
         new = self.candle
@@ -84,7 +88,10 @@ class TimeFrame(BaseModel):
         new.high_price = v.high_price if v.high_price > new.high_price else new.high_price
         new.low_price = v.low_price if v.low_price < new.low_price else new.low_price
 
-        is_new_1m = v.open_time != self._candle_prev_2s.open_time and v.closetime != self._candle_prev_2s.close_time
+        is_new_1m = (
+            v.open_time != self._candle_prev_2s.open_time
+            and v.closetime != self._candle_prev_2s.close_time
+        )
         if is_new_1m:
             new.base_volume += v.base_volume
             new.quote_volume += v.quote_volume
@@ -101,3 +108,13 @@ class TimeFrame(BaseModel):
         self._candle_prev_2s = v
         return new
 
+
+
+    @validator("miniticker", "ticker")
+    @classmethod
+    def update_miniticker(self, v):
+        if v.event_time < self.open_time or v.event_time > self.close_time:
+            raise ValidationError(
+                f"Attempted to add miniticker in the wrong timeframe. Open en close time are {self.open_time} and {self.close_time}, but the event_time of new value is {v.event_time}."
+            )
+        return v
