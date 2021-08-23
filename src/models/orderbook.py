@@ -1,20 +1,20 @@
 from typing import Deque
 
 from pydantic import BaseModel
-from pydantic.types import condecimal
+from pydantic.types import PositiveInt, condecimal
 
 
 class Bid(BaseModel):
-    price: condecimal(decimal_places=8, gt=0)
+    price:    condecimal(decimal_places=8, gt=0)
     quantity: condecimal(decimal_places=8, gt=0)
 
 
 class Ask(BaseModel):
-    price: condecimal(decimal_places=8, gt=0)
+    price:    condecimal(decimal_places=8, gt=0)
     quantity: condecimal(decimal_places=8, gt=0)
 
 
-class OrderBook(BaseModel):
+class OrderBookUpdate(BaseModel):
     """Orderbook within timeframe.
 
     {
@@ -35,5 +35,6 @@ class OrderBook(BaseModel):
 
     """
 
-    bids: Deque[Bid]
-    asks: Deque[Ask]
+    update_id: PositiveInt
+    bids:      Deque[Bid]
+    asks:      Deque[Ask]

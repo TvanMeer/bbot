@@ -8,7 +8,7 @@ from pydantic.error_wrappers import ValidationError
 from .candle import Candle
 from .ticker import MiniTicker, Ticker
 from .depth import Depth5, Depth10, Depth20
-from .orderbook import OrderBook
+from .orderbook import OrderBookUpdate
 from .trade import AggTrade, Trade
 
 
@@ -29,7 +29,7 @@ class TimeFrame(BaseModel):
     miniticker:          Optional[MiniTicker]
     ticker:              Optional[Ticker]
     depth:               Optional[Union[Depth5, Depth10, Depth20]]
-    orderbook:           Optional[OrderBook]
+    orderbook:           Optional[Deque[OrderBookUpdate]]
     aggtrade:            Optional[Deque[AggTrade]]
     trade:               Optional[Deque[Trade]]
 
@@ -135,4 +135,18 @@ class TimeFrame(BaseModel):
             )
         self._depth_last_update = v.last_update_time
         return v
+
+
+
+    @validator("orderbook", each_item=True)
+    @classmethod
+    def update_orderbook(self, v):
+        if self.orderbook == None:
+            return v
+        if v.update_id <= self.orderbook[-1]:
+            raise ValidationError(
+                f"Attempted to overwrite existing entries in orderbook."
+            )
+        return v
+
 
