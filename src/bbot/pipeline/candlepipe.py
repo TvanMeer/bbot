@@ -1,11 +1,10 @@
 from typing import List, Tuple
+from pydantic.error_wrappers import ValidationError
 
 from .pipe import Pipeline
 from .helpers import get_interval
 from models.database import DataBase, Window
 from models.candle import Candle
-from models.options import Options
-
 
 
 class CandleHistoryPipeline(Pipeline):
@@ -23,7 +22,21 @@ class CandleHistoryPipeline(Pipeline):
     def parse(self, raw: List) -> Candle:
         """Turns historical candle into a Candle object."""
 
-        pass
+        try:
+            c = Candle(
+                open_price=raw[1],
+                close_price=raw[4],
+                high_price=raw[2],
+                low_price=raw[3],
+                base_volume=raw[5],
+                quote_volume=raw[7],
+                base_volume_taker=raw[9],
+                quote_volume_taker=raw[10],
+                n_trades=raw[8],
+            )
+        except ValidationError as e:
+            raise Exception(e)
+        return c
 
     def insert(self, candle: Candle, window: Window) -> DataBase:
         """Inserts the historical candle in the corresponding window.
@@ -33,9 +46,8 @@ class CandleHistoryPipeline(Pipeline):
         pass
 
 
-
 class CandlePipeline(Pipeline):
-
+    
     def get_window(self, raw: dict, db: DataBase) -> Window:
         """Receives a candle as a dictionary from a websocket.
         Finds and returns the corresponding window in the database.
