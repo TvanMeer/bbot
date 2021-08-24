@@ -19,8 +19,8 @@ class Pipeline(ABC):
 
     @abstractmethod
     def get_window(self, raw: Any, db: DataBase) -> Window:
-        """Gets the window where `raw` should be inserted
-        from database, based on symbol field and time data in raw data.
+        """Gets the window from the database, where `raw` should be inserted.
+        The window choice is based on the symbol field and time data fields in `raw`.
         """
 
         raise NotImplementedError
@@ -35,8 +35,8 @@ class Pipeline(ABC):
 
     @abstractmethod
     def insert(self, item: BaseModel, window: Window) -> DataBase:
-        """Inserts this model in window.
-        Then inserts the window in database and returns database.
+        """Inserts this model in the corresponding window.
+        Then inserts this window in the database and returns the updated database.
         """
 
         raise NotImplementedError
