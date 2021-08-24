@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from .pipe import Pipeline
+from .helpers import get_interval
 from models.database import DataBase, Window
 from models.candle import Candle
 from models.options import Options
@@ -9,12 +10,15 @@ from models.options import Options
 
 class CandleHistoryPipeline(Pipeline):
 
-    def get_window(self, raw: Tuple[str, Options.Interval, List], db: DataBase) -> Window:
-        """Receives a tuple (symbol, interval, raw_candle).
-        Only returns the corresponding window in the database.
+    def get_window(self, raw: Tuple[str, List], db: DataBase) -> Window:
+        """Receives the symbol and historical candle as list.
+        Finds and returns the corresponding window in the database.
         """
 
-        pass
+        open_time = raw[1][0]
+        close_time = raw[1][6]
+        interval = get_interval(open_time, close_time)
+        return db.symbols[raw[0]].windows[interval]
 
     def parse(self, raw: List) -> Candle:
         """Turns historical candle into a Candle object."""
