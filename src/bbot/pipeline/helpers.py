@@ -22,5 +22,8 @@ def get_interval(open_time: str, close_time: str):
         604800000: Options.Interval.week_1,
     }
 
-    ms = int(close_time) - int(open_time)
+    try:
+        ms = close_time - open_time
+    except KeyError:
+        raise Exception("Candle has incorrect time interval")
     return delta[ms]
