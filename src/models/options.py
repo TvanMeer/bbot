@@ -1,10 +1,10 @@
-from typing import Callable, Iterable, Optional, Union
-from collections.abc import Iterable as CollectionsIter
+from typing import Callable, Optional
+from collections.abc import Iterable
 from enum import Enum
 
 from pydantic import BaseModel, validator
 from pydantic.error_wrappers import ValidationError
-from pydantic.types import DirectoryPath, PositiveInt, SecretStr
+from pydantic.types import DirectoryPath, SecretStr
 
 
 class Options(BaseModel):
@@ -49,25 +49,25 @@ class Options(BaseModel):
 
 
 
-    key:              SecretStr                                     = " "
-    secret:           SecretStr                                     = " "
-    mode:             Mode                                          = Mode.test
-    datadir:          Optional[DirectoryPath]                       = None
-    base_assets:      Union[str, Iterable[str]]                     = ["BTC", "HOT"]
-    quote_assets:     Union[str, Iterable[str]]                     = ["USDT"]
-    window_intervals: Union[Interval, Iterable[Interval]]           = [Interval.second_2, Interval.minute_1]
-    window_length:    PositiveInt                                   = 200
-    streams:          Optional[Union[Stream, Iterable[Stream]]]     = [Stream.candle, Stream.depth5, Stream.miniticker]
-    features:         Optional[Union[Callable, Iterable[Callable]]] = None
+    key:              SecretStr               = " "
+    secret:           SecretStr               = " "
+    mode:             Mode                    = Mode.test
+    datadir:          Optional[DirectoryPath] = None
+    base_assets:      set[str]                = {"BTC", "HOT"}
+    quote_assets:     set[str]                = {"USDT"}
+    window_intervals: set[Interval]           = {Interval.second_2, Interval.minute_1}
+    window_length:    int                     = 200
+    streams:          Optional[set[Stream]]   = {Stream.candle, Stream.depth5, Stream.miniticker}
+    features:         Optional[set[Callable]] = None
 
 
 
     @validator("key", "secret")
     @classmethod
     def _check_credentials(cls, v):
-        if not v == " " or not len(v) == 64:
+        if not v == " " and not len(v) == 64:
             raise ValidationError("Both key and secret should be of length 64.")
-        if not v == " " or not v.islanum():
+        if not v == " " and not v.islanum():
             raise ValidationError("Both key and secret should be alphanumeric.")
         return v
 
@@ -81,14 +81,66 @@ class Options(BaseModel):
             if not s.isalnum():
                 raise ValidationError("Asset names should be alphanumeric, like `BTC` or `USDC`.")
 
-        asset_names = v.lower() if v is type(str) else list(map(str.lower, v))
-        map(check_str, asset_names)
-        return list(asset_names)
+        if isinstance(v, str):
+            check_str(v)
+            return {v.lower()}
+        elif isinstance(v, Iterable):
+            map(check_str, v)
+            lower = set(map(str.lower, v))
+            return lower
+        else:
+            raise ValidationError("Asset names should be strings.")
+
+
+    @validator("window_intervals")
+    @classmethod
+    def _make_window_intervals(cls, v):
+
+        def iv(val):
+            val = val.lower()
+            if val in list(map(str, cls.Interval)):
+                return cls.Interval(val)
+            else:
+                raise ValidationError("Invalid window intervals.")
+
+        if isinstance(v, str):
+            return {iv(v)}
+        elif isinstance(v, Iterable):
+            itvs = set()
+            [itvs.add(iv(s)) for s in v]
+            return itvs
+        else:
+            raise ValidationError("Invalid window intervals: should be strings.")
+        
+
+    @validator("window_length")
+    @classmethod
+    def _check_window_length(cls, v):
+        if v == "*":
+            return 0
+        elif isinstance(v, int) and v >= 0:
+            return v
+        else:
+            raise ValidationError("Invalid window length.")
 
 
     @validator("streams")
     @classmethod
-    def _make_stream_iterable(cls, v):
-        if not isinstance(v, CollectionsIter):
-            return [v]
-        return v
+    def _make_streams(cls, v):
+
+        def stream(val):
+            val = val.lower()
+            if val in list(map(str, cls.Stream)):
+                return cls.Stream(val)
+            else:
+                raise ValidationError("Invalid streams.")
+
+        if isinstance(v, str):
+            return {stream(v)}
+        elif isinstance(v, Iterable):
+            strms = set()
+            [strms.add(stream(s)) for s in v]
+            return strms
+        else:
+            raise ValidationError("Invalid streams: should be strings.")
+   
