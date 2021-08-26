@@ -1,7 +1,9 @@
-from datetime import time
-
+from asyncio import Queue
+from binance import AsyncClient, BinanceSocketManager
 from pydantic import BaseModel
 from pydantic.types import PositiveInt, condecimal
+
+from .options import Options
 
 
 class Candle(BaseModel):
@@ -33,7 +35,7 @@ class Candle(BaseModel):
     }
 
     """
-
+        
     open_price:         condecimal(decimal_places=8, gt=0)   # o
     close_price:        condecimal(decimal_places=8, gt=0)   # c
     high_price:         condecimal(decimal_places=8, gt=0)   # h
@@ -43,3 +45,41 @@ class Candle(BaseModel):
     base_volume_taker:  condecimal(decimal_places=8)         # V
     quote_volume_taker: condecimal(decimal_places=8)         # Q
     n_trades:           PositiveInt                          # n
+
+
+    @classmethod
+    async def stream_coro(cls, symbol: str, queue: Queue, manager: BinanceSocketManager):
+      socket = manager.kline_socket(symbol)
+      async with socket as candle_socket:
+        while True:
+          raw_candle = await candle_socket.recv()
+          queue.put(raw_candle)
+
+
+    @classmethod
+    async def history_coro(cls, symbols: set[str], intervals: set[Options.Interval], window_length: int, queue: Queue, client: AsyncClient):
+      
+      def gen_timestring(i, l):
+        amount = i[:-1]
+        period = i[-1]
+        total = l * amount
+        if period == "m":
+          return total + " minutes ago UTC"
+        elif period == "h":
+          return total + " hours ago UTC"
+        elif period == "d":
+          return total + " days ago UTC"
+        else:
+          return period + " weeks ago UTC"
+      
+      for s in symbols:
+        for i in intervals:
+          if i == Options.Interval.second_2:
+            continue
+          else:
+            symbol = s.upper()
+            interval = i.value
+            time_str = gen_timestring(interval, window_length)
+            async for raw_candle in await client.get_historical_klines_generator(symbol, i.value, time_str):
+              queue.put(raw_candle)
+      
