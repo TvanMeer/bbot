@@ -8,7 +8,9 @@ from .options import Options
 
 
 class Candle(BaseModel):
-    """Candlestick from websocket stream.
+    """Candlestick from websocket stream or historical API call.
+
+    stream:
 
     {
       "e": "kline",     // Event type
@@ -35,29 +37,51 @@ class Candle(BaseModel):
       }
     }
 
+
+    history:
+
+    [
+      [
+        1499040000000,      // Open time
+        "0.01634790",       // Open
+        "0.80000000",       // High
+        "0.01575800",       // Low
+        "0.01577100",       // Close
+        "148976.11427815",  // Volume
+        1499644799999,      // Close time
+        "2434.19055334",    // Quote asset volume
+        308,                // Number of trades
+        "1756.87402397",    // Taker buy base asset volume
+        "28.46694368",      // Taker buy quote asset volume
+        "17928899.62484339" // Ignore.
+      ]
+    ]
+
+
     """
 
-    open_price:         condecimal(decimal_places=8, gt=0)  # o
-    close_price:        condecimal(decimal_places=8, gt=0)  # c
-    high_price:         condecimal(decimal_places=8, gt=0)  # h
-    low_price:          condecimal(decimal_places=8, gt=0)  # l
-    base_volume:        condecimal(decimal_places=8)        # v
-    quote_volume:       condecimal(decimal_places=8)        # q
-    base_volume_taker:  condecimal(decimal_places=8)        # V
-    quote_volume_taker: condecimal(decimal_places=8)        # Q
-    n_trades:           PositiveInt                         # n
+    open_price:         condecimal(decimal_places=8, gt=0)  # o   1
+    close_price:        condecimal(decimal_places=8, gt=0)  # c   4
+    high_price:         condecimal(decimal_places=8, gt=0)  # h   2
+    low_price:          condecimal(decimal_places=8, gt=0)  # l   3
+    base_volume:        condecimal(decimal_places=8)        # v   5
+    quote_volume:       condecimal(decimal_places=8)        # q   7
+    base_volume_taker:  condecimal(decimal_places=8)        # V   9
+    quote_volume_taker: condecimal(decimal_places=8)        # Q   10
+    n_trades:           PositiveInt                         # n   8
 
 
 
     @classmethod
-    async def stream_coro(
+    async def stream_producer(
         cls,
         symbol:        str,
         queue:         asyncio.Queue,
+        client:        AsyncClient,
         manager:       BinanceSocketManager,
         shutdown_flag: bool,
     ) -> None:
-        """Coroutine that streams candle data for a single symbol through a websocket.
+        """Coroutine that streams candlestick data for a single symbol through a websocket.
 
         Single candles are added to the queue, as tuple(symbol, interval, content_type, raw_candle)
         Streams are always 1 minute candles. Windows are programatically updated later.
@@ -70,11 +94,12 @@ class Candle(BaseModel):
                 raw_candle = await candle_socket.recv()
                 msg = (symbol, "*", ContentType.candle_stream, raw_candle)
                 await queue.put(msg)
+        await client.close_connection()
 
 
 
     @classmethod
-    async def history_coro(
+    async def history_producer(
         cls,
         symbols:       set[str],
         intervals:     set[Options.Interval],
@@ -83,12 +108,12 @@ class Candle(BaseModel):
         client:        AsyncClient,
         shutdown_flag: bool,
     ) -> None:
-        """Coroutine that downloads historical candle data for all selected symbols and time intervals.
+        """Coroutine that downloads historical candlestick data for all selected symbols and time intervals.
 
         Single candles are added to the queue, as tuple(symbol, interval, content_type, raw_candle)
         After n candles are processed, where n == window_length, a `finish` notification is added to the queue.
         After every filled window, the coroutine pauzes for 5 seconds, to avoid API abuse.
-        This procedure can be cancelled by setting `shutdown_flag` to true.
+        This procedure is cancelled if `shutdown_flag` is set to true.
         """
 
         def gen_timestring(i, l):
