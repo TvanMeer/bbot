@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Deque, Optional
 from pydantic import BaseModel
 from pydantic.class_validators import validator
@@ -6,6 +7,11 @@ from pydantic.types import constr
 
 from .options import Options
 from .timeframe import TimeFrame
+
+class ContentType(str, Enum):
+    candle_stream:  "candle"
+    candle_history: "candle_history"
+    
 
 class Window(BaseModel):
     """Holds a sequence of timeframes and additional metadata."""

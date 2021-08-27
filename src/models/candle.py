@@ -3,6 +3,7 @@ from binance import AsyncClient, BinanceSocketManager
 from pydantic import BaseModel
 from pydantic.types import PositiveInt, condecimal
 
+from .database import ContentType
 from .options import Options
 
 
@@ -56,12 +57,19 @@ class Candle(BaseModel):
         manager:       BinanceSocketManager,
         shutdown_flag: bool,
     ) -> None:
+        """Coroutine that streams candle data for a single symbol through a websocket.
+
+        Single candles are added to the queue, as tuple(symbol, interval, content_type, raw_candle)
+        Streams are always 1 minute candles. Windows are programatically updated later.
+        This way bbot requires only one stream for multiple windows.
+        """
 
         socket = manager.kline_socket(symbol)
         async with socket as candle_socket:
             while not shutdown_flag:
                 raw_candle = await candle_socket.recv()
-                await queue.put(raw_candle)
+                msg = (symbol, "*", ContentType.candle_stream, raw_candle)
+                await queue.put(msg)
 
 
 
@@ -75,11 +83,18 @@ class Candle(BaseModel):
         client:        AsyncClient,
         shutdown_flag: bool,
     ) -> None:
+        """Coroutine that downloads historical candle data for all selected symbols and time intervals.
+
+        Single candles are added to the queue, as tuple(symbol, interval, content_type, raw_candle)
+        After n candles are processed, where n == window_length, a `finish` notification is added to the queue.
+        After every filled window, the coroutine pauzes for 5 seconds, to avoid API abuse.
+        This procedure can be cancelled by setting `shutdown_flag` to true.
+        """
 
         def gen_timestring(i, l):
             amount = i[:-1]
             period = i[-1]
-            total = l * amount
+            total  = str(l * amount)
             if period == "m":
                 return total + " minutes ago UTC"
             elif period == "h":
@@ -87,13 +102,14 @@ class Candle(BaseModel):
             elif period == "d":
                 return total + " days ago UTC"
             else:
-                return period + " weeks ago UTC"
+                return total + " weeks ago UTC"
 
         async def download_window(s, i, t):
             async for raw_candle in await client.get_historical_klines_generator(
                 s, i, t
             ):
-                await queue.put(raw_candle)
+                msg = (s.lower(), Options.Interval(i), ContentType.candle_history, raw_candle)
+                await queue.put(msg)
 
         for s in symbols:
             for i in intervals:
@@ -107,6 +123,6 @@ class Candle(BaseModel):
                 else:
                     await download_window(symbol, interval, time)
                     await queue.put(
-                        {"finished": {"symbol": symbol, "interval": interval}}
+                        {"history_finished": {"symbol": symbol, "interval": interval}}
                     )
                     await asyncio.sleep(5)
