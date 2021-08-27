@@ -72,9 +72,8 @@ class Candle(BaseModel):
 
 
 
-    @classmethod
+    @staticmethod
     async def stream_producer(
-        cls,
         symbol:        str,
         queue:         asyncio.Queue,
         client:        AsyncClient,
@@ -98,9 +97,8 @@ class Candle(BaseModel):
 
 
 
-    @classmethod
+    @staticmethod
     async def history_producer(
-        cls,
         symbol:        str,
         intervals:     set[Options.Interval],
         window_length: int,
