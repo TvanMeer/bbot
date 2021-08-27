@@ -101,14 +101,14 @@ class Candle(BaseModel):
     @classmethod
     async def history_producer(
         cls,
-        symbols:       set[str],
+        symbol:        str,
         intervals:     set[Options.Interval],
         window_length: int,
         queue:         asyncio.Queue,
         client:        AsyncClient,
         shutdown_flag: bool,
     ) -> None:
-        """Coroutine that downloads historical candlestick data for all selected symbols and time intervals.
+        """Coroutine that downloads historical candlestick data for a single symbol and all time intervals.
 
         Single candles are added to the queue, as tuple(symbol, interval, content_type, raw_candle)
         After n candles are processed, where n == window_length, a `finish` notification is added to the queue.
@@ -136,18 +136,16 @@ class Candle(BaseModel):
                 msg = (s, Options.Interval(i), ContentType.candle_history, raw_candle)
                 await queue.put(msg)
 
-        for s in symbols:
-            for i in intervals:
-                symbol = s
-                interval = i.value
-                time = gen_timestring(interval, window_length)
-                if shutdown_flag:
-                    return
-                elif i == Options.Interval.second_2:
-                    continue
-                else:
-                    await download_window(symbol, interval, time)
-                    await queue.put(
-                        ("candle_history_finished", symbol, interval)
-                    )
-                    await asyncio.sleep(5)
+        for i in intervals:
+          interval = i.value
+          time = gen_timestring(interval, window_length)
+          if shutdown_flag:
+            return
+          elif i == Options.Interval.second_2:
+            continue
+          else:
+            await download_window(symbol, interval, time)
+            await queue.put(
+              ("candle_history_finished", symbol, interval)
+            )
+          await asyncio.sleep(5)
