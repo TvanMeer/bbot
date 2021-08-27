@@ -106,14 +106,14 @@ class Candle(BaseModel):
 
         async def download_window(s, i, t):
             async for raw_candle in await client.get_historical_klines_generator(
-                s, i, t
+                s.upper(), i, t
             ):
-                msg = (s.lower(), Options.Interval(i), ContentType.candle_history, raw_candle)
+                msg = (s, Options.Interval(i), ContentType.candle_history, raw_candle)
                 await queue.put(msg)
 
         for s in symbols:
             for i in intervals:
-                symbol = s.upper()
+                symbol = s
                 interval = i.value
                 time = gen_timestring(interval, window_length)
                 if shutdown_flag:
@@ -123,6 +123,6 @@ class Candle(BaseModel):
                 else:
                     await download_window(symbol, interval, time)
                     await queue.put(
-                        {"history_finished": {"symbol": symbol, "interval": interval}}
+                        ("candle_history_finished", symbol, interval)
                     )
                     await asyncio.sleep(5)
