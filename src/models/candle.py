@@ -1,4 +1,4 @@
-from asyncio import Queue
+import asyncio
 from binance import AsyncClient, BinanceSocketManager
 from pydantic import BaseModel
 from pydantic.types import PositiveInt, condecimal
@@ -35,51 +35,78 @@ class Candle(BaseModel):
     }
 
     """
-        
-    open_price:         condecimal(decimal_places=8, gt=0)   # o
-    close_price:        condecimal(decimal_places=8, gt=0)   # c
-    high_price:         condecimal(decimal_places=8, gt=0)   # h
-    low_price:          condecimal(decimal_places=8, gt=0)   # l
-    base_volume:        condecimal(decimal_places=8)         # v
-    quote_volume:       condecimal(decimal_places=8)         # q
-    base_volume_taker:  condecimal(decimal_places=8)         # V
-    quote_volume_taker: condecimal(decimal_places=8)         # Q
-    n_trades:           PositiveInt                          # n
 
+    open_price:         condecimal(decimal_places=8, gt=0)  # o
+    close_price:        condecimal(decimal_places=8, gt=0)  # c
+    high_price:         condecimal(decimal_places=8, gt=0)  # h
+    low_price:          condecimal(decimal_places=8, gt=0)  # l
+    base_volume:        condecimal(decimal_places=8)        # v
+    quote_volume:       condecimal(decimal_places=8)        # q
+    base_volume_taker:  condecimal(decimal_places=8)        # V
+    quote_volume_taker: condecimal(decimal_places=8)        # Q
+    n_trades:           PositiveInt                         # n
 
-    @classmethod
-    async def stream_coro(cls, symbol: str, queue: Queue, manager: BinanceSocketManager):
-      socket = manager.kline_socket(symbol)
-      async with socket as candle_socket:
-        while True:
-          raw_candle = await candle_socket.recv()
-          queue.put(raw_candle)
 
 
     @classmethod
-    async def history_coro(cls, symbols: set[str], intervals: set[Options.Interval], window_length: int, queue: Queue, client: AsyncClient):
-      
-      def gen_timestring(i, l):
-        amount = i[:-1]
-        period = i[-1]
-        total = l * amount
-        if period == "m":
-          return total + " minutes ago UTC"
-        elif period == "h":
-          return total + " hours ago UTC"
-        elif period == "d":
-          return total + " days ago UTC"
-        else:
-          return period + " weeks ago UTC"
-      
-      for s in symbols:
-        for i in intervals:
-          if i == Options.Interval.second_2:
-            continue
-          else:
-            symbol = s.upper()
-            interval = i.value
-            time_str = gen_timestring(interval, window_length)
-            async for raw_candle in await client.get_historical_klines_generator(symbol, i.value, time_str):
-              queue.put(raw_candle)
-      
+    async def stream_coro(
+        cls,
+        symbol:        str,
+        queue:         asyncio.Queue,
+        manager:       BinanceSocketManager,
+        shutdown_flag: bool,
+    ) -> None:
+
+        socket = manager.kline_socket(symbol)
+        async with socket as candle_socket:
+            while not shutdown_flag:
+                raw_candle = await candle_socket.recv()
+                await queue.put(raw_candle)
+
+
+
+    @classmethod
+    async def history_coro(
+        cls,
+        symbols:       set[str],
+        intervals:     set[Options.Interval],
+        window_length: int,
+        queue:         asyncio.Queue,
+        client:        AsyncClient,
+        shutdown_flag: bool,
+    ) -> None:
+
+        def gen_timestring(i, l):
+            amount = i[:-1]
+            period = i[-1]
+            total = l * amount
+            if period == "m":
+                return total + " minutes ago UTC"
+            elif period == "h":
+                return total + " hours ago UTC"
+            elif period == "d":
+                return total + " days ago UTC"
+            else:
+                return period + " weeks ago UTC"
+
+        async def download_window(s, i, t):
+            async for raw_candle in await client.get_historical_klines_generator(
+                s, i, t
+            ):
+                await queue.put(raw_candle)
+
+        for s in symbols:
+            for i in intervals:
+                symbol = s.upper()
+                interval = i.value
+                time = gen_timestring(interval, window_length)
+                if shutdown_flag:
+                    return
+                elif i == Options.Interval.second_2:
+                    continue
+                else:
+                    await download_window(symbol, interval, time)
+                    await queue.put(
+                        {"finished": {"symbol": symbol, "interval": interval}}
+                    )
+                    await asyncio.sleep(5)
