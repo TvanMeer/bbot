@@ -1,6 +1,10 @@
 import asyncio
+import logging
+from typing import List
+
 from binance import AsyncClient, BinanceSocketManager
 from pydantic import BaseModel
+from pydantic.error_wrappers import ValidationError
 from pydantic.types import PositiveInt, condecimal
 
 from .database import ContentType
@@ -69,6 +73,48 @@ class Candle(BaseModel):
     base_volume_taker:  condecimal(decimal_places=8)        # V   9
     quote_volume_taker: condecimal(decimal_places=8)        # Q   10
     n_trades:           PositiveInt                         # n   8
+    corrupt:            bool = False
+
+
+
+    @staticmethod
+    def parse_candle(raw_candle: dict):
+      """Returns Candle instance."""
+
+      try:
+        return Candle(
+          open_price         =raw_candle["o"], 
+          close_price        =raw_candle["c"],
+          high_price         =raw_candle["h"],
+          low_price          =raw_candle["l"],
+          base_volume        =raw_candle["v"],
+          quote_volume       =raw_candle["q"],
+          base_volume_taker  =raw_candle["V"],
+          quote_volume_taker =raw_candle["Q"],
+          n_trades           =raw_candle["n"]
+        )
+      except ValidationError as e:
+        logging.critical(e)
+
+
+    @staticmethod
+    def parse_historical_candle(raw_candle: List):
+      """Returns Candle instance."""
+
+      try:
+        return Candle(
+          open_price         =raw_candle[1], 
+          close_price        =raw_candle[4],
+          high_price         =raw_candle[2],
+          low_price          =raw_candle[3],
+          base_volume        =raw_candle[5],
+          quote_volume       =raw_candle[7],
+          base_volume_taker  =raw_candle[9],
+          quote_volume_taker =raw_candle[10],
+          n_trades           =raw_candle[8]
+        )
+      except ValidationError as e:
+        logging.critical(e)
 
 
 
@@ -147,3 +193,5 @@ class Candle(BaseModel):
               ("candle_history_finished", symbol, interval)
             )
           await asyncio.sleep(5)
+
+
