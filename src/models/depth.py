@@ -1,5 +1,5 @@
 from typing import Tuple
-from datetime import time
+from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic.types import condecimal
@@ -13,7 +13,7 @@ class Depth5(BaseModel):
     Every entry is a tuple of <price, quantity>
     """
 
-    last_update_time: time    
+    last_update_time: datetime    
     bid1:  Tuple[condecimal(decimal_places=8), condecimal(decimal_places=8)]
     ask1:  Tuple[condecimal(decimal_places=8), condecimal(decimal_places=8)]
     bid2:  Tuple[condecimal(decimal_places=8), condecimal(decimal_places=8)]

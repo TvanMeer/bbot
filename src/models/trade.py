@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic.types import PositiveInt, StrictBool, condecimal, conint
@@ -22,7 +22,7 @@ class AggTrade(BaseModel):
 
     """
 
-    trade_time:          time
+    trade_time:          datetime
     aggtrade_id:         PositiveInt
     first_trade_id:      PositiveInt
     last_trade_id:       conint(ge= first_trade_id)
@@ -52,7 +52,7 @@ class Trade():
 
     """
 
-    trade_time:          time
+    trade_time:          datetime
     trade_id:            PositiveInt
     buyer_order_id:      PositiveInt
     seller_order_id:     PositiveInt

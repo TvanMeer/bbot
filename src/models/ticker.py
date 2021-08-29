@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic.types import PositiveInt, condecimal
@@ -21,7 +21,7 @@ class MiniTicker(BaseModel):
 
     """
 
-    event_time:             time                           # E
+    event_time:             datetime                       # E
     current_price:          condecimal(decimal_places=8)   # c
     price_24_hours_ago:     condecimal(decimal_places=8)   # o
     high_price_last_24h:    condecimal(decimal_places=8)   # h
@@ -62,7 +62,7 @@ class Ticker(BaseModel):
 
     """
 
-    event_time:                    time                           # E
+    event_time:                    datetime                       # E
     current_price:                 condecimal(decimal_places=8)   # c
     price_24_hours_ago:            condecimal(decimal_places=8)   # o
     high_price_last_24h:           condecimal(decimal_places=8)   # h

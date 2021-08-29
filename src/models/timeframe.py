@@ -1,5 +1,5 @@
 from typing import Deque, Optional, Union
-from datetime import time
+from datetime import datetime
 
 from pydantic import BaseModel
 from pydantic.class_validators import validator
@@ -20,11 +20,11 @@ class TimeFrame(BaseModel):
     """
 
     _candle_prev_2s:    Candle
-    _depth_last_update: time
-    _latency:           time
+    _depth_last_update: datetime
+    _latency:           datetime
 
-    open_time:          time
-    close_time:         time
+    open_time:          datetime
+    close_time:         datetime
 
     candle:             Optional[Candle]
     miniticker:         Optional[MiniTicker]
@@ -74,15 +74,6 @@ class TimeFrame(BaseModel):
         This way only one stream is needed for each symbol, when multiple time intervals
         are selected.
         """
-
-        if v.open_time < self.open_time:
-            raise ValidationError(
-                "Attempted to add candle to the wrong timeframe. Needs to be in a previous timeframe."
-            )
-        if v.close_time > self.close_time:
-            raise ValidationError(
-                "Attempted to add candle to the wrong timeframe. Needs to be in the next timeframe."
-            )
 
         # New candle
         if self.candle == None:
