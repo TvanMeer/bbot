@@ -1,3 +1,5 @@
+# pylint: disable=no-name-in-module
+
 from typing import Callable, Optional
 from collections.abc import Iterable
 from enum import Enum

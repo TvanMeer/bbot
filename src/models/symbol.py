@@ -1,3 +1,5 @@
+# pylint: disable=no-name-in-module
+
 from pydantic import BaseModel
 from pydantic.types import constr
 

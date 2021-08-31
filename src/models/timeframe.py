@@ -1,3 +1,5 @@
+# pylint: disable=no-name-in-module
+
 from collections import deque
 from typing import Deque, Optional, TypeVar, Union
 from datetime import datetime, timedelta
