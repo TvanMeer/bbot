@@ -1,77 +1,45 @@
 from enum import Enum
-from typing import Deque, Optional
+from typing import Optional
 from pydantic import BaseModel
-from pydantic.class_validators import validator
-from pydantic.error_wrappers import ValidationError
-from pydantic.types import constr
 
 from .options import Options
-from .timeframe import TimeFrame
+from .symbol import Symbol
 
 class ContentType(str, Enum):
-    candle_stream:  "candle"
+
+    candle_stream:  "candle_stream"
     candle_history: "candle_history"
-    
-
-class Window(BaseModel):
-    """Holds a sequence of timeframes and additional metadata."""
-
-    timeframes: Deque[TimeFrame]
-
-    @validator("timeframes", each_item=True)
-    @classmethod
-    def insert_timeframe(self, v):
-        last = self.timeframes[-1]
-        interval_last = last.close_time - last.open_time
-        interval_new = v.close_time - v.open_time
-        if interval_last != interval_new:
-            raise ValidationError(f"Timeframe inserted in {interval_last}ms window instead of {interval_new}ms window.")
-        if last.close_time != v.open_time -1:
-            raise ValidationError(f"Data leakage: timeframe inserted in {interval_last}ms window is not the next in the sequence.")
-        return v
-
-
-class Symbol(BaseModel):
-    """Holds all data related to a symbol, such as `BTCUSDT`,
-    and additional metadata.
-    """
-
-    name:    constr(strip_whitespace=True, to_lower=True, min_length=3, max_length=6)
-    windows: dict[Options.Interval, Window]
-
-    @validator("windows")
-    @classmethod
-    def make_windows_singleton(self, v):
-        if v.keys() in self.windows.keys():
-            raise ValidationError("Window already exists for this symbol.")
-        else:
-            return v
-
 
 class DataBase(BaseModel):
-    """Contains all data.
+    """The root of the datamodel.
     This class is injected in user defined feature functions.
+    All data is nested in this model, hierarchical:
 
-    db -> dict[symbols] -> dict[windows] -> deque[timeframes]
+    db -> dict[str, Symbol] -> dict[Options.Interval, Window] -> deque[Timeframe] -> candle
+                                                                                  -> miniticker
+                                                                                  -> ...
 
-    Database contains one or more symbols, like `BTCUSDC` and `ETHBTC`.
+    Database contains one or more symbols, like `btcusdc` and `ethbtc`.
     A symbol contains one or more windows, like `1m` and `4h`.
-    A window holds a sequence of timeframes.
+    A window contains a sequence of timeframes.
+    A timeframe contains one candle, one miniticker at close time, 
+    one ticker at close time, the depth cache at close time,
+    all orderbook updates within the timeframe,
+    all trades within the timeframe, and
+    all aggregate trades within the timeframe.
 
     Example:
     Get last 1 minute candle for symbol `BTCUSDC`:
 
-    db.symbols["BTCUSDC"].windows[Interval.minute_1].timeframes[-1]
+    db.symbols["BTCUSDC"].windows[Interval.minute_1].timeframes[-1].candle
     """
 
-    options: Options
+    options:                Options
 
-    # Data not realtime:
-    all_symbols_at_binance: Optional[set]
-    selected_symbols: Optional[set]
+    # all_symbols_at_binance: Optional[set]
+    # selected_symbols:       Optional[set]
     # exchange info
     # account info
 
-    # Realtime data:
-    symbols: Optional[dict[str, Symbol]]
+    symbols:                Optional[dict[str, Symbol]]
     # user events
