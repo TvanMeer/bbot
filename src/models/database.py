@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional
 from pydantic import BaseModel
 
 from .options import Options
@@ -36,10 +35,10 @@ class DataBase(BaseModel):
 
     options:                Options
 
-    # all_symbols_at_binance: Optional[set]
-    # selected_symbols:       Optional[set]
+    all_symbols_at_binance: set[str]          = set()
+    selected_symbols:       set[str]          = set()
     # exchange info
     # account info
 
-    symbols:                Optional[dict[str, Symbol]]
+    symbols:                dict[str, Symbol] = dict()
     # user events
