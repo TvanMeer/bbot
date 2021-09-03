@@ -1,3 +1,5 @@
+# pylint: disable=no-name-in-module
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 from binance import Client
@@ -8,7 +10,7 @@ from ..models.options import Options
 
 
 class DataProcessor(ABC):
-    """Processes a single field of data, such as database.all_symbols, database.transactions etc."""
+    """Processes the response of a single API call to Binance."""
 
     @abstractmethod
     def download(self, client: Client) -> Any:
@@ -19,7 +21,7 @@ class DataProcessor(ABC):
         pass
 
     @abstractmethod
-    def insert(self, obj: BaseModel, db: DataBase):
+    def insert(self, obj: BaseModel, db: DataBase) -> DataBase:
         pass
 
 
@@ -30,7 +32,7 @@ class SymbolProcessor(DataProcessor):
     def parse(self, tickers: List[Dict[str, str]]) -> BaseModel:
         pass
 
-    def insert(self, symbols: BaseModel, db: DataBase):
+    def insert(self, symbols: BaseModel, db: DataBase) -> DataBase:
         pass
 
 
@@ -41,7 +43,7 @@ class Downloader:
     """
 
     def __init__(self, options: Options):
-        if options.mode == options.Mode.test:
+        if options.mode == options.Mode.TEST:
             pass
         else:
             self.database = DataBase(options)
@@ -52,8 +54,8 @@ class Downloader:
 
             # Download account info if option `paper` or `trade` is selected
             if (
-                options.mode == options.Mode.paper
-                or options.mode == options.Mode.trade
+                options.mode == options.Mode.PAPER
+                or options.mode == options.Mode.TRADE
             ):
                 self.database = self.download_account_info(
                     client, self.database
