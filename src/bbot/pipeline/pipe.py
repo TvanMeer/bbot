@@ -6,6 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, List, Tuple
 
+from models.candle import Candle
 from models.database import ContentType, DataBase, Window
 from models.options import Options
 from models.timeframe import TimeFrame
@@ -81,7 +82,7 @@ class Pipeline(ABC):
 
         elif p == PayloadBelongsToTimeframe.NEXT:
             window = self.create_next_timeframe(window)
-            window = self.insert_first_time(payload, window)
+            window = self.insert_in_next_timeframe(payload, window)
 
         elif p == PayloadBelongsToTimeframe.FIRST:
             if o:
@@ -158,6 +159,12 @@ class Pipeline(ABC):
 
         pass
 
+    @abstractmethod
+    def insert_in_next_timeframe(self, payload: Any, window: Window) -> Window:
+        """Insert payload in next timeframe in the sequence of timeframes."""
+
+        pass
+
 
     @abstractmethod
     def update_timeframe(self, payload: Any, window: Window, prev_timeframe = False) -> Window:
@@ -168,21 +175,36 @@ class Pipeline(ABC):
 
 
 class HistoricalCandlePipe(Pipeline):
-    """ """
 
     def get_open_close_time(self, payload: List) -> Tuple[datetime, datetime]:
-        pass
+        o = datetime(payload[0])
+        c = datetime(payload[6])
+        return (o, c)
+
 
     def insert_first_time(self, payload: List, window: Window) -> Window:
-        pass
+        candle = Candle.parse_historical_candle(payload)
+        window.timeframes[-1].candle = candle
+        return window
 
-    def update_timeframe(self, payload: Any, window: Window, prev_timeframe) -> Window:
+
+    def insert_in_next_timeframe(self, payload: List, window: Window) -> Window:
+        generated_tf = window.timeframes[-1]
+        o, c = self.get_open_close_time(payload)
+        if generated_tf.open_time != o or generated_tf.close_time != c:
+            raise Exception("Inconsistent open and close times in historical candle data.")
+
+        candle = Candle.parse_historical_candle(payload)
+        window.timeframes[-1].candle = candle
+        return window
+
+
+    def update_timeframe(self, payload: Any, window: Window, prev_timeframe: bool) -> Window:
         raise Exception("Trying to update timeframe in historical data.")
 
 
 
 class StreamCandlePipe(Pipeline):
-    """ """
 
     def get_open_close_time(self, payload: dict) -> Tuple[datetime, datetime]:
         pass
@@ -190,6 +212,9 @@ class StreamCandlePipe(Pipeline):
     def insert_first_time(self, payload: dict, window: Window) -> Window:
         pass
 
-    def update_timeframe(self, payload: dict, window: Window, prev_timeframe) -> Window:
+    def insert_in_next_timeframe(self, payload: dict, window: Window) -> Window:
+        pass
+
+    def update_timeframe(self, payload: dict, window: Window, prev_timeframe: bool) -> Window:
         pass
         
