@@ -8,8 +8,8 @@ from .symbol import Symbol
 
 class ContentType(str, Enum):
 
-    candle_stream:  "candle_stream"
-    candle_history: "candle_history"
+    CANDLE_STREAM:  "CANDLE_STREAM"
+    CANDLE_HISTORY: "CANDLE_HISTORY"
 
 class DataBase(BaseModel):
     """The root of the datamodel.

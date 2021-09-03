@@ -15,51 +15,51 @@ class Options(BaseModel):
     """
 
     class Mode(str, Enum):
-        test       = "test"
-        history    = "history"
-        stream     = "stream"
-        paper      = "paper"
-        trade      = "trade"
+        TEST       = "TEST"
+        HISTORY    = "HISTORY"
+        STREAM     = "STREAM"
+        PAPER      = "PAPER"
+        TRADE      = "TRADE"
 
     class Stream(str, Enum):
-        candle     = "candle"
-        miniticker = "miniticker"
-        ticker     = "ticker"
-        depth5     = "depth5"
-        depth10    = "depth10"
-        depth20    = "depth20"
-        orderbook  = "orderbook"
-        aggtrade   = "aggtrade"
-        trade      = "trade"
+        CANDLE     = "CANDLE"
+        MINITICKER = "MINITICKER"
+        TICKER     = "TICKER"
+        DEPTH5     = "DEPTH5"
+        DEPTH10    = "DEPTH10"
+        DEPTH20    = "DEPTH20"
+        ORDERBOOK  = "ORDERBOOK"
+        AGGTRADE   = "AGGTRADE"
+        TRADE      = "TRADE"
 
     class Interval(str, Enum):
-        second_2   = "2s"
-        minute_1   = "1m"
-        minute_3   = "3m"
-        minute_5   = "5m"
-        minute_15  = "15m"
-        minute_30  = "30m"
-        hour_1     = "1h"
-        hour_2     = "2h"
-        hour_4     = "4h"
-        hour_6     = "6h"
-        hour_8     = "8h"
-        hour_12    = "12h"
-        day_1      = "1d"
-        day_3      = "3d"
-        week_1     = "1w"
+        SECOND_2   = "2s"
+        MINUTE_1   = "1m"
+        MINUTE_3   = "3m"
+        MINUTE_5   = "5m"
+        MINUTE_15  = "15m"
+        MINUTE_30  = "30m"
+        HOUR_1     = "1h"
+        HOUR_2     = "2h"
+        HOUR_4     = "4h"
+        HOUR_6     = "6h"
+        HOUR_8     = "8h"
+        HOUR_12    = "12h"
+        DAY_1      = "1d"
+        DAY_3      = "3d"
+        WEEK_1     = "1w"
 
 
 
     key:              SecretStr               = " "
     secret:           SecretStr               = " "
-    mode:             Mode                    = Mode.test
+    mode:             Mode                    = Mode.TEST
     datadir:          Optional[DirectoryPath] = None
     base_assets:      set[str]                = {"BTC", "HOT"}
     quote_assets:     set[str]                = {"USDT"}
-    window_intervals: set[Interval]           = {Interval.second_2, Interval.minute_1}
+    window_intervals: set[Interval]           = {Interval.SECOND_2, Interval.MINUTE_1}
     window_length:    int                     = 200
-    streams:          Optional[set[Stream]]   = {Stream.candle, Stream.depth5, Stream.miniticker}
+    streams:          Optional[set[Stream]]   = {Stream.CANDLE, Stream.DEPTH5, Stream.MINITICKER}
     features:         Optional[set[Callable]] = None
 
 
