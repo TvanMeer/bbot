@@ -2,54 +2,17 @@
 
 from typing import Callable, Optional
 from collections.abc import Iterable
-from enum import Enum
 
 from pydantic import BaseModel, validator
 from pydantic.error_wrappers import ValidationError
 from pydantic.types import DirectoryPath, SecretStr
 
+from ..bbot.constants import Mode, Interval, Stream
 
 class Options(BaseModel):
     """Contains all optional arguments for Bbot.
     Required by Bot object at initialization.
     """
-
-    class Mode(str, Enum):
-        TEST       = "TEST"
-        HISTORY    = "HISTORY"
-        STREAM     = "STREAM"
-        PAPER      = "PAPER"
-        TRADE      = "TRADE"
-
-    class Stream(str, Enum):
-        CANDLE     = "CANDLE"
-        MINITICKER = "MINITICKER"
-        TICKER     = "TICKER"
-        DEPTH5     = "DEPTH5"
-        DEPTH10    = "DEPTH10"
-        DEPTH20    = "DEPTH20"
-        ORDERBOOK  = "ORDERBOOK"
-        AGGTRADE   = "AGGTRADE"
-        TRADE      = "TRADE"
-
-    class Interval(str, Enum):
-        SECOND_2   = "2s"
-        MINUTE_1   = "1m"
-        MINUTE_3   = "3m"
-        MINUTE_5   = "5m"
-        MINUTE_15  = "15m"
-        MINUTE_30  = "30m"
-        HOUR_1     = "1h"
-        HOUR_2     = "2h"
-        HOUR_4     = "4h"
-        HOUR_6     = "6h"
-        HOUR_8     = "8h"
-        HOUR_12    = "12h"
-        DAY_1      = "1d"
-        DAY_3      = "3d"
-        WEEK_1     = "1w"
-
-
 
     key:              SecretStr               = " "
     secret:           SecretStr               = " "
