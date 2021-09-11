@@ -6,10 +6,7 @@ from pydantic import BaseModel
 from .options import Options
 from .symbol import Symbol
 
-class ContentType(str, Enum):
 
-    CANDLE_STREAM:  "CANDLE_STREAM"
-    CANDLE_HISTORY: "CANDLE_HISTORY"
 
 class DataBase(BaseModel):
     """The root of the datamodel.
