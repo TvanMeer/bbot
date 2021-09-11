@@ -3,13 +3,13 @@
 from abc import ABC, abstractmethod
 from collections import Counter
 from datetime import datetime, timedelta
-from typing import Any, List, Tuple
+from typing import Any, List
 
-from ..constants import *
+from ..constants import ContentType, Interval, InTimeFrame
 from models.candle import Candle
-from models.database import ContentType, DataBase, Window
-from models.options import Options
+from models.database import DataBase
 from models.timeframe import TimeFrame
+from models.window import Window
 
 class Pipeline(ABC):
     """Handles insertion of content in the database."""
