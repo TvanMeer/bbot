@@ -1,3 +1,5 @@
+# pylint: disable=no-name-in-module
+
 import asyncio
 import logging
 from typing import List, Type, TypeVar
@@ -7,8 +9,7 @@ from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 from pydantic.types import PositiveInt, condecimal
 
-from .database import ContentType
-from .options import Options
+from ..bbot.constants import ContentType, Interval
 
 _Candle = TypeVar("_Candle", bound="Candle")
 
@@ -206,7 +207,7 @@ class Candle(BaseModel):
         async with socket as candle_socket:
             while not shutdown_flag:
                 raw_candle = await candle_socket.recv()
-                msg = (symbol, "*", ContentType.candle_stream, raw_candle)
+                msg = (symbol, "*", ContentType.CANDLE_STREAM, raw_candle)
                 await queue.put(msg)
         await client.close_connection()
 
@@ -215,7 +216,7 @@ class Candle(BaseModel):
     @staticmethod
     async def history_producer(
         symbol:        str,
-        intervals:     set[Options.Interval],
+        intervals:     set[Interval],
         window_length: int,
         queue:         asyncio.Queue,
         client:        AsyncClient,
@@ -249,8 +250,8 @@ class Candle(BaseModel):
             ):
                 msg = (
                     s,
-                    Options.Interval(i),
-                    ContentType.candle_history,
+                    Interval(i),
+                    ContentType.CANDLE_HISTORY,
                     raw_candle,
                 )
                 await queue.put(msg)
@@ -260,11 +261,12 @@ class Candle(BaseModel):
             time = gen_timestring(interval, window_length)
             if shutdown_flag:
                 return
-            elif i == Options.Interval.second_2:
+            elif i == Interval.SECOND_2:
                 continue
             else:
                 await download_window(symbol, interval, time)
                 await queue.put(
-                  ("candle_history_finished", symbol, interval)
+                  (symbol, interval, None, "finished_history_download")
                 )
-            await asyncio.sleep(5)
+                await asyncio.sleep(5)
+
