@@ -10,6 +10,8 @@ from pydantic.error_wrappers import ValidationError
 from pydantic.types import PositiveInt, condecimal
 
 from ..bbot.constants import ContentType, Interval
+from ..bbot.pipeline import HistoricalCandlePipe, StreamCandlePipe
+from .database import DataBase
 
 _Candle = TypeVar("_Candle", bound="Candle")
 
@@ -269,4 +271,36 @@ class Candle(BaseModel):
                   (symbol, interval, None, "finished_history_download")
                 )
                 await asyncio.sleep(5)
+
+
+
+    @staticmethod
+    async def history_consumer(
+        queue:         asyncio.Queue,
+        db:            DataBase,
+        shutdown_flag: bool
+    ) -> None:
+        
+        pipeline = HistoricalCandlePipe()
+        while not shutdown_flag:
+            symbol, interval, contenttype, payload = await queue.get()
+            if payload == "finished_history_download":
+                db.symbols[symbol].windows[interval]._history_downloaded = True
+            else:
+                db = pipeline.process(symbol, interval, contenttype, payload, db)
+
+
+
+    @staticmethod
+    async def stream_consumer(
+        queue:         asyncio.Queue,
+        db:            DataBase,
+        shutdown_flag: bool
+    ) -> None:
+        
+        pipeline = StreamCandlePipe()
+        while not shutdown_flag:
+            symbol, interval, contenttype, payload = await queue.get()
+            if db.symbols[symbol].windows[interval]._history_downloaded:
+                db = pipeline.process(symbol, interval, contenttype, payload, db)
 
