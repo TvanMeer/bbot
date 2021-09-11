@@ -42,3 +42,21 @@ class Interval(str, Enum):
     DAY_1      = "1d"
     DAY_3      = "3d"
     WEEK_1     = "1w"
+
+
+class ContentType(str, Enum):
+    """Different types of content the pipeline can process."""
+
+    CANDLE_STREAM:  "CANDLE_STREAM"
+    CANDLE_HISTORY: "CANDLE_HISTORY"
+
+class InTimeFrame(str, Enum):
+    """Used in pipeline. 
+    Describes in which timeframe a new piece of content should be placed or updated.
+    """
+
+    FIRST:    "FIRST"
+    PREVIOUS: "PREVIOUS"
+    CURRENT:  "CURRENT"
+    NEXT:     "NEXT"
+    OTHER:    "OTHER"
