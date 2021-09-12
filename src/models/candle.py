@@ -2,16 +2,17 @@
 
 import asyncio
 import logging
-from typing import List, Type, TypeVar
+from typing import List, Optional, Type, TypeVar
 
 from binance import AsyncClient, BinanceSocketManager
 from pydantic import BaseModel
 from pydantic.error_wrappers import ValidationError
 from pydantic.types import PositiveInt, condecimal
 
-from ..bbot.constants import ContentType, Interval
+from ..bbot.constants import ContentType, Interval, Stream
 from ..bbot.pipeline import HistoricalCandlePipe, StreamCandlePipe
 from .database import DataBase
+from .options import Options
 
 _Candle = TypeVar("_Candle", bound="Candle")
 
@@ -303,4 +304,67 @@ class Candle(BaseModel):
             symbol, interval, contenttype, payload = await queue.get()
             if db.symbols[symbol].windows[interval]._history_downloaded:
                 db = pipeline.process(symbol, interval, contenttype, payload, db)
+
+
+
+    @staticmethod
+    def get_tasks(
+        options:       Options, 
+        client:        AsyncClient, 
+        manager:       BinanceSocketManager, 
+        db:            DataBase,
+        shutdown_flag: bool
+    ) -> Optional[set[asyncio.Task]]:
+
+        if not Stream.CANDLE in options.streams:
+            return
+
+        q_hist = asyncio.Queue()
+        q_str = asyncio.Queue()
+
+        hp_tasks = set()
+        for sym in db.selected_symbols:
+            hp_tasks.add(
+                asyncio.create_task(
+                    Candle.history_producer(
+                        symbol        =sym,
+                        intervals     =options.window_intervals,
+                        window_length =options.window_length,
+                        queue         =q_hist,
+                        client        =client,
+                        shutdown_flag =shutdown_flag
+                    )
+                )
+            )
+
+        hc = asyncio.create_task(
+            Candle.history_consumer(
+                queue         =q_hist, 
+                db            =db, 
+                shutdown_flag =shutdown_flag
+            )
+        )
+
+        sp_tasks = set()
+        for sym in db.selected_symbols:
+            sp_tasks.add(
+                asyncio.create_task(
+                    Candle.stream_producer(
+                        symbol        =sym,
+                        queue         =q_str, 
+                        client        =client,
+                        manager       =manager,
+                        shutdown_flag =shutdown_flag
+                    )
+                )
+            )
+
+        sc = asyncio.create_task(
+            Candle.stream_consumer(
+                queue         =q_str, 
+                db            =db, 
+                shutdown_flag =shutdown_flag
+            )
+        )
+        return {*hp_tasks, hc, *sp_tasks, sc}
 
