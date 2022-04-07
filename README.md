@@ -4,6 +4,8 @@ A simple framework to build Binance spot trading bots
 
 ---PRE-ALPHA---
 
+Warning: this project is moved to [Scalpr](https://github.com/TvanMeer/scalpr).
+
 ## Description
 
 Bbot is a microframework for building homebrew Binance trade bots. It provides a higher level of abstraction on top of [python-binance](https://python-binance.readthedocs.io/en/latest/index.html). Bbot streams [candlestick data](https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams) from Binance and provides basic functionality to work with this data and act upon changes in realtime.
